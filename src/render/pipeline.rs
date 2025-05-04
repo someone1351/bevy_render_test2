@@ -4,6 +4,8 @@ use bevy::render::renderer::RenderDevice;
 use bevy::render::render_resource::*;
 use bevy::render::view::ViewUniform;
 
+use super::shaders;
+
 #[derive(Resource,Clone)]
 pub struct MyUiPipeline {
     pub view_layout: BindGroupLayout,
@@ -31,13 +33,13 @@ impl SpecializedRenderPipeline for MyUiPipeline {
 
         RenderPipelineDescriptor {
             vertex: VertexState {
-                shader: super::COLORED_MESH2D_SHADER_HANDLE,
+                shader: shaders::COLORED_MESH2D_SHADER_HANDLE,
                 entry_point: "vertex".into(),
                 shader_defs: Vec::new(),
                 buffers: vec![vertex_buffer_layout],
             },
             fragment: Some(FragmentState {
-                shader: super::COLORED_MESH2D_SHADER_HANDLE,
+                shader: shaders::COLORED_MESH2D_SHADER_HANDLE,
                 shader_defs: Vec::new(),
                 entry_point: "fragment".into(),
                 targets: vec![Some(ColorTargetState {

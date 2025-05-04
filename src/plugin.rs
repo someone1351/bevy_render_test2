@@ -4,9 +4,9 @@ use bevy::prelude::*;
 use super::render;
 
 #[derive(Default)]
-pub struct UiDisplayPlugin;
+pub struct TestRenderPlugin;
 
-impl Plugin for UiDisplayPlugin {
+impl Plugin for TestRenderPlugin {
     fn build(&self, _app: &mut App) {
 
     }

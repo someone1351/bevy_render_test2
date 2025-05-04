@@ -100,7 +100,6 @@ pub fn extract_uinodes(
 
     for (_entity, test, ) in uinode_query.iter() {
         extracted_elements.elements.push(MyUiExtractedElement{
-            image:None,
             entity:commands.spawn((TemporaryRenderEntity,)).id(),
             camera_entity,
             x: test.x,
@@ -154,17 +153,12 @@ pub fn prepare_uinodes(
     mut commands: Commands,
     render_device: Res<RenderDevice>,
     render_queue: Res<RenderQueue>,
-
     extracted_elements : Res<MyUiExtractedElements>,
     mut ui_meta: ResMut<MyUiMeta>,
-
     mesh2d_pipeline: Res<MyUiPipeline>,
-
     view_uniforms: Res<ViewUniforms>,
     extracted_views: Query<Entity, With<ExtractedView>>,
-
 ) {
-
 
     if let Some(view_binding) = view_uniforms.uniforms.binding() {
         for entity in extracted_views.iter() {

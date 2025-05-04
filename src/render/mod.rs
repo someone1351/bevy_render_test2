@@ -1,16 +1,8 @@
 
-
-use bevy::core_pipeline::{core_2d::graph::Node2d,core_3d::graph::Node3d};
-use bevy::ecs::prelude::*;
-use bevy::asset::{Handle, load_internal_asset};
-use bevy::app::App;
-
-use bevy::render::{
-    render_resource::*,
-    render_graph::{RenderLabel, RenderSubGraph,RenderGraph,RunGraphOnViewNode},
-    render_phase::*,
-    Render,RenderApp, RenderSet, ExtractSchedule,
-};
+use bevy::prelude::*;
+use bevy::render::render_resource::*;
+use bevy::render::render_phase::*;
+use bevy::render::{Render,RenderApp, RenderSet, ExtractSchedule,};
 
 pub mod systems;
 pub mod pipeline;
@@ -20,53 +12,17 @@ pub mod pass;
 pub mod resources;
 pub mod components;
 pub mod camera;
+pub mod graphs;
+pub mod shaders;
 
 use systems::*;
 use pipeline::*;
 use phase::*;
 use draw::*;
-use pass::*;
 use resources::*;
 // use components::*;
 // use camera::*;
 
-pub const COLORED_MESH2D_SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(5312396983770130001);
-
-pub fn setup_shaders(app: &mut bevy::app::App) {
-    load_internal_asset!(app, COLORED_MESH2D_SHADER_HANDLE, "mesh2d_col.wgsl", Shader::from_wgsl);
-}
-
-#[derive(Debug, Hash, PartialEq, Eq, Clone, RenderLabel)]
-struct MyUiPassNodeLabel;
-
-#[derive(Debug, Hash, PartialEq, Eq, Clone, RenderSubGraph)]
-struct MyUiSubGraphLabel;
-
-fn setup_graph2d(app: &mut App) {
-    let render_app = app.get_sub_app_mut(RenderApp).unwrap();
-    let mut ui_graph_2d = RenderGraph::default();
-    ui_graph_2d.add_node( MyUiPassNodeLabel, MyUiPassNode::new(render_app.world_mut()));
-    let mut render_graph = render_app.world_mut().resource_mut::<RenderGraph>();
-
-    if let Some(graph_2d) = render_graph.get_sub_graph_mut(bevy::core_pipeline::core_2d::graph::Core2d) {
-        graph_2d.add_sub_graph(MyUiSubGraphLabel,ui_graph_2d);
-        graph_2d.add_node(MyUiPassNodeLabel,RunGraphOnViewNode::new(MyUiSubGraphLabel),);
-        graph_2d.add_node_edge(Node2d::EndMainPass, MyUiPassNodeLabel);
-    }
-}
-
-fn setup_graph3d(app: &mut App) {
-    let render_app = app.get_sub_app_mut(RenderApp).unwrap();
-    let mut ui_graph_3d = RenderGraph::default();
-    ui_graph_3d.add_node( MyUiPassNodeLabel, MyUiPassNode::new(render_app.world_mut()));
-    let mut render_graph = render_app.world_mut().resource_mut::<RenderGraph>();
-
-    if let Some(graph_3d) = render_graph.get_sub_graph_mut(bevy::core_pipeline::core_3d::graph::Core3d) {
-        graph_3d.add_sub_graph(MyUiSubGraphLabel , ui_graph_3d);
-        graph_3d.add_node(MyUiPassNodeLabel,RunGraphOnViewNode::new(MyUiSubGraphLabel),);
-        graph_3d.add_node_edge(Node3d::EndMainPass, MyUiPassNodeLabel);
-    }
-}
 
 pub fn setup(app: &mut bevy::app::App) {
     let render_app = app.get_sub_app_mut(RenderApp).unwrap();
@@ -74,8 +30,6 @@ pub fn setup(app: &mut bevy::app::App) {
     render_app
         .init_resource::<MyUiMeta>()
         .init_resource::<MyUiExtractedElements>()
-        .init_resource::<DummyGpuImage>()
-        .init_resource::<MyUiImageBindGroups>()
         .init_resource::<MyUiPipeline>()
         .init_resource::<SpecializedRenderPipelines<MyUiPipeline>>()
         .init_resource::<DrawFunctions<MyTransparentUi>>()
@@ -91,8 +45,8 @@ pub fn setup(app: &mut bevy::app::App) {
             prepare_uinodes.in_set(RenderSet::PrepareBindGroups),
         )) ;
 
-    setup_shaders(app);
-    setup_graph2d(app);
-    setup_graph3d(app);
+    shaders::setup_shaders(app);
+    graphs::setup_graph2d(app);
+    graphs::setup_graph3d(app);
 }
 

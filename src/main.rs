@@ -1,20 +1,10 @@
 
-
-
 use std::collections::HashSet;
 
-use bevy::app::*;
 use bevy::prelude::*;
-use bevy::color::Color;
 
-// use bevy::ui::{AlignSelf, JustifySelf, Node};
-
-use bevy::DefaultPlugins;
-use bevy::prelude::{Camera3d, KeyCode, PluginGroup, };
 use render_test::TestComponent;
-use render_test::UiDisplayPlugin;
-// use TestComponent;
-
+use render_test::TestRenderPlugin as TestRenderPlugin;
 
 fn main() {
     let mut app = App::new();
@@ -32,16 +22,11 @@ fn main() {
                     }),
                     ..Default::default()
             }),
-            UiDisplayPlugin,
+            TestRenderPlugin,
         ))
 
-        .add_systems(Startup, (
-            setup_camera,
-            setup_ui,
-        ))
-        .add_systems(Update, (
-            update_input,
-        ))
+        .add_systems(Startup, ( setup_ui, ))
+        .add_systems(Update, ( update_input, ))
         ;
 
     app.run();
@@ -50,15 +35,10 @@ fn main() {
 pub fn setup_ui(
     mut commands: Commands,
 ) {
+    commands.spawn((Camera3d::default(),));
     commands.spawn((
         TestComponent{ col: Color::srgb(1.0,0.2,0.1), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
     ));
-}
-
-fn setup_camera(mut commands: Commands) {
-    // commands.spawn(( Camera2dBundle { camera: Camera { ..Default::default() }, ..Default::default() }, ));
-    // commands.spawn((Camera3dBundle { camera: Camera { ..Default::default() }, ..Default::default() },));
-    commands.spawn((Camera3d::default(),));
 }
 
 fn update_input(
@@ -81,5 +61,4 @@ fn update_input(
             last_pressed.remove(&ev.key_code);
         }
     }
-
 }
