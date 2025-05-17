@@ -1,4 +1,3 @@
-#![allow(unused_parens)]
 
 use bevy::render::render_phase::*;
 use bevy::render::view::ViewUniformOffset;

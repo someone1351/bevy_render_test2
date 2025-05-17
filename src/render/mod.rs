@@ -1,4 +1,5 @@
 
+
 use bevy::prelude::*;
 use bevy::render::render_resource::*;
 use bevy::render::render_phase::*;
@@ -36,7 +37,7 @@ pub fn setup(app: &mut bevy::app::App) {
         .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>()
         .add_render_command::<MyTransparentUi, DrawMesh>()
         .add_systems(ExtractSchedule,(
-            extract_default_ui_camera_view,
+            extract_camera_view,
             extract_uinodes
         ).chain())
         .add_systems( Render,(
@@ -46,7 +47,9 @@ pub fn setup(app: &mut bevy::app::App) {
         )) ;
 
     shaders::setup_shaders(app);
-    graphs::setup_graph2d(app);
-    graphs::setup_graph3d(app);
+
+    let render_app = app.get_sub_app_mut(RenderApp).unwrap();
+    graphs::setup_graph2d(render_app);
+    graphs::setup_graph3d(render_app);
 }
 

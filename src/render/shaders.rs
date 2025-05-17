@@ -1,6 +1,6 @@
 
-use bevy::{asset::{load_internal_asset, Handle}, prelude::Shader};
-
+use bevy::asset::{load_internal_asset, Handle};
+use bevy::prelude::Shader;
 
 pub const COLORED_MESH2D_SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(5312396983770130001);
 

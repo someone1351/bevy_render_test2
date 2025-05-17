@@ -2,4 +2,5 @@ pub mod components;
 pub mod render;
 pub mod plugin;
 
-pub use {plugin::*,components::*,};
+pub use plugin::*;
+pub use components::*;
