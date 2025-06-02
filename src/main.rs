@@ -1,10 +1,11 @@
 
 use std::collections::HashSet;
 
-use bevy::{prelude::*, render::{camera::Viewport, view::RenderLayers}};
-
-use render_test::{TestRenderComponent, TestRenderPlugin};
-use bevy::color::palettes::basic::SILVER;
+use bevy::prelude::*;
+use render_test2::{core::CorePipelinePlugin, mesh::{TestRenderComponent, TestRenderPlugin}};
+// use bevy::render::view::RenderLayers;
+// use render_test2::{render::camera::CameraMyTest, TestRenderComponent, TestRenderPlugin};
+// use bevy::color::palettes::basic::SILVER;
 
 fn main() {
     let mut app = App::new();
@@ -22,12 +23,14 @@ fn main() {
                     }),
                     ..Default::default()
             }),
+            CorePipelinePlugin,
             TestRenderPlugin,
         ))
 
         .add_systems(Startup, (
-            setup_ui,
-            // setup_2d, setup_3d,
+            // setup_ui,
+            setup_2d,
+            // setup_3d,
         ))
         .add_systems(Update, ( update_input, ))
         ;
@@ -36,144 +39,156 @@ fn main() {
 }
 
 pub fn setup_ui(
-    mut commands: Commands,
+    // mut commands: Commands,
 ) {
-    commands.spawn((
-        Camera2d::default(),
-        // Camera3d::default(),
-        // CameraTest::default(),
-        // // RenderLayers::from_layers(&[0]),
-        Transform::from_xyz(0.0, 7., 14.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
-        Camera {
-            order: 0,
-            clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.2, 0.6)),
-            viewport: Some(Viewport {
-                physical_position: UVec2::new(0, 0),
-                physical_size: UVec2::new(500, 500), //not size, actually x2,y2
-                ..Default::default()
-            }),
-            ..Default::default()
-        },
-    ));
-
     // commands.spawn((
-    //     Camera3d::default(),
-    //     // CameraTest::default(),
-    //     // RenderLayers::from_layers(&[0]),
+    //     CameraMyTest{},
+    //     // Camera2d::default(),
+    //     // // Camera3d::default(),
+    //     // // CameraTest::default(),
+    //     // // // RenderLayers::from_layers(&[0]),
+    //     // Transform::from_xyz(0.0, 7., 14.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
     //     Camera {
-    //         order: 1,
-    //         clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.6, 0.2)),
-    //         viewport: Some(Viewport {
-    //             physical_position: UVec2::new(600, 0),
-    //             physical_size: UVec2::new(500, 500), //not size, actually x2,y2
-    //             // depth: 0.0..1.0,
-    //             ..Default::default()
-    //         }),
+    //         order: 0,
+    //         clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.2, 0.6)),
+    //         // viewport: Some(Viewport {
+    //         //     physical_position: UVec2::new(0, 0),
+    //         //     physical_size: UVec2::new(500, 500), //not size, actually x2,y2
+    //         //     ..Default::default()
+    //         // }),
     //         ..Default::default()
     //     },
     // ));
 
-    commands.spawn((
-        TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
-        // RenderLayers::layer(0),
-    ));
+    // // commands.spawn((
+    // //     Camera3d::default(),
+    // //     // CameraTest::default(),
+    // //     // RenderLayers::from_layers(&[0]),
+    // //     Camera {
+    // //         order: 1,
+    // //         clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.6, 0.2)),
+    // //         viewport: Some(Viewport {
+    // //             physical_position: UVec2::new(600, 0),
+    // //             physical_size: UVec2::new(500, 500), //not size, actually x2,y2
+    // //             // depth: 0.0..1.0,
+    // //             ..Default::default()
+    // //         }),
+    // //         ..Default::default()
+    // //     },
+    // // ));
+
+    // commands.spawn((
+    //     TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
+    //     // RenderLayers::layer(0),
+    // ));
 }
 
 pub fn setup_2d(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<ColorMaterial>>,
+    // mut meshes: ResMut<Assets<Mesh>>,
+    // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
-        Camera2d::default(),
+        render_test2::core::core_2d::Camera2d::default(),
         Camera {
             order: 2,
-            clear_color: ClearColorConfig::Custom(Color::srgb(0.9, 0.1, 0.9)),
-            viewport: Some(Viewport {
-                physical_position: UVec2::new(200, 200),
-                physical_size: UVec2::new(500, 500),
-                ..Default::default()
-            }),
+            clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.1, 0.5)),
+            // viewport: Some(Viewport {
+            //     physical_position: UVec2::new(500, 0),
+            //     physical_size: UVec2::new(500, 500),
+            //     ..Default::default()
+            // }),
             ..Default::default()
         },
     ));
 
-    let num_shapes = 5;
-
-    let shape=meshes.add(Rectangle::new(50.0, 50.0));
-    const X_EXTENT: f32 = 300.;
-
-    for i in 0..num_shapes {
-        let color = Color::hsl(360. * i as f32 / num_shapes as f32, 0.95, 0.7);
-
-        commands.spawn((
-            Mesh2d(shape.clone()),
-            MeshMaterial2d(materials.add(color)),
+    commands.spawn((
+        TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: -50.0, y: 50.0, w: 350.0, h: 350.0, },
+        // RenderLayers::layer(0),
             Transform::from_xyz(
-                -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
+                0.0,
                 0.0,
                 0.0,
             ),
-        ));
-    }
+    ));
+    // let num_shapes = 5;
+
+    // let shape=meshes.add(Rectangle::new(50.0, 50.0));
+    // const X_EXTENT: f32 = 300.;
+
+    // for i in 0..num_shapes {
+    //     let color = Color::hsl(360. * i as f32 / num_shapes as f32, 0.95, 0.7);
+
+    //     // commands.spawn((
+    //     //     Mesh2d(shape.clone()),
+    //     //     MeshMaterial2d(materials.add(color)),
+    //     //     Transform::from_xyz(
+    //     //         -X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * X_EXTENT,
+    //     //         0.0,
+    //     //         0.0,
+    //     //     ),
+    //     // ));
+    // }
 }
 
-pub fn setup_3d(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands.spawn((
-        Camera3d::default(),
-        Transform::from_xyz(0.0, 17., 24.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
-        Camera {
-            order: 3,
-            clear_color: ClearColorConfig::Custom(Color::srgb(0.9, 0.9, 0.1)),
-            viewport: Some(Viewport {
-                physical_position: UVec2::new(300, 300),
-                physical_size: UVec2::new(500, 500), //not size, actually x2,y2
-                ..Default::default()
-            }),
-            ..Default::default()
-        },
-    ));
+// pub fn setup_3d(
+//     mut commands: Commands,
+//     mut meshes: ResMut<Assets<Mesh>>,
+//     mut materials: ResMut<Assets<StandardMaterial>>,
+// ) {
+//     commands.spawn((
+//         Camera3d::default(),
+//         Transform::from_xyz(0.0, 17., 24.0).looking_at(Vec3::new(0., 1., 0.), Vec3::Y),
+//         Camera {
+//             order: 3,
+//             clear_color: ClearColorConfig::Custom(Color::srgb(0.1, 0.9, 0.1)),
+//             viewport: Some(Viewport {
+//                 physical_position: UVec2::new(0, 500),
+//                 physical_size: UVec2::new(500, 500), //not size, actually x2,y2
+//                 ..Default::default()
+//             }),
+//             ..Default::default()
+//         },
+//     ));
 
-    let shape=meshes.add(Cuboid::default());
+//     let shape=meshes.add(Cuboid::default());
 
-    const SHAPES_X_EXTENT: f32 = 14.0;
-    const Z_EXTENT: f32 = 5.0;
-    let num_shapes = 10;
-    let material = materials.add(StandardMaterial {base_color:Color::linear_rgb(0.7, 0.1, 0.3), ..default() });
+//     const SHAPES_X_EXTENT: f32 = 14.0;
+//     const Z_EXTENT: f32 = 5.0;
+//     let num_shapes=5;
 
-    for i in 0 .. 10 {
-        commands.spawn((
-            Mesh3d(shape.clone()),
-            MeshMaterial3d(material.clone()),
-            Transform::from_xyz(
-                -SHAPES_X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * SHAPES_X_EXTENT,
-                2.0,
-                Z_EXTENT / 2.,
-            )
-        ));
-    }
+//     for i in 0 .. num_shapes {
+//         let color = Color::hsl(360. * i as f32 / num_shapes as f32, 0.95, 0.7);
+//         let material = materials.add(StandardMaterial {base_color:color, ..default() });
 
-    commands.spawn((
-        PointLight {
-            shadows_enabled: true,
-            intensity: 10_000_000.,
-            range: 100.0,
-            shadow_depth_bias: 0.2,
-            ..default()
-        },
-        Transform::from_xyz(8.0, 16.0, 8.0),
-    ));
+//         commands.spawn((
+//             Mesh3d(shape.clone()),
+//             MeshMaterial3d(material.clone()),
+//             Transform::from_xyz(
+//                 -SHAPES_X_EXTENT / 2. + i as f32 / (num_shapes - 1) as f32 * SHAPES_X_EXTENT,
+//                 2.0,
+//                 Z_EXTENT / 2.,
+//             )
+//         ));
+//     }
 
-    // ground plane
-    commands.spawn((
-        Mesh3d(meshes.add(Plane3d::default().mesh().size(20.0, 20.0).subdivisions(10))),
-        MeshMaterial3d(materials.add(Color::from(SILVER))),
-    ));
-}
+//     commands.spawn((
+//         PointLight {
+//             shadows_enabled: true,
+//             intensity: 10_000_000.,
+//             range: 100.0,
+//             shadow_depth_bias: 0.2,
+//             ..default()
+//         },
+//         Transform::from_xyz(8.0, 16.0, 8.0),
+//     ));
+
+//     // ground plane
+//     commands.spawn((
+//         Mesh3d(meshes.add(Plane3d::default().mesh().size(20.0, 20.0).subdivisions(10))),
+//         MeshMaterial3d(materials.add(Color::from(SILVER))),
+//     ));
+// }
 
 fn update_input(
     mut key_events: EventReader<bevy::input::keyboard::KeyboardInput>,
@@ -184,7 +199,7 @@ fn update_input(
         //
         if ev.state==bevy::input::ButtonState::Pressed && !last_pressed.contains(&ev.key_code) {
             if ev.key_code==KeyCode::Escape || ev.key_code==KeyCode::F4 {
-                exit.send(AppExit::Success);
+                exit.write(AppExit::Success);
             }
         }
 
