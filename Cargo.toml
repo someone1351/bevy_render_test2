@@ -7,9 +7,7 @@ edition = "2021"
 bevy = { version = "0.16", default-features = false, features = [
     "serialize","bevy_window","x11", "bevy_render", "bevy_asset","bevy_color","bevy_core_pipeline","multi_threaded",
 	"bevy_image",
-	"tonemapping_luts",
-	"bevy_sprite",
-	"bevy_pbr",
+	"trace",
 ] }
 
 bytemuck = "1.7"
@@ -20,3 +18,7 @@ radsort = "0.1"
 bevy = { version = "0.16", default-features = false, features = [
     "dynamic_linking"
 ] }
+[features]
+trace = []
+webgl = []
+webgpu = []

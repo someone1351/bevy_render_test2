@@ -35,8 +35,8 @@ pub mod core_2d;
 //     upscaling::UpscalingPlugin,
 // };
 use bevy::app::{App, Plugin};
-use bevy::asset::load_internal_asset;
-use bevy::render::prelude::Shader;
+// use bevy::asset::load_internal_asset;
+// use bevy::render::prelude::Shader;
 use core_2d::Core2dPlugin;
 // use oit::OrderIndependentTransparencyPlugin;
 
