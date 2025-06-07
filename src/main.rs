@@ -103,7 +103,7 @@ pub fn setup_2d(
     ));
 
     commands.spawn((
-        TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: -50.0, y: 50.0, w: 350.0, h: 350.0, },
+        TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
         // RenderLayers::layer(0),
             Transform::from_xyz(
                 0.0,

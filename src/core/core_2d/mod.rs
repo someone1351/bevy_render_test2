@@ -36,7 +36,7 @@ pub mod graph {
 use core::ops::Range;
 
 use bevy::asset::UntypedAssetId;
-use bevy::core_pipeline::upscaling::UpscalingNode;
+// use bevy::core_pipeline::upscaling::UpscalingNode;
 use bevy::platform::collections::{HashMap, HashSet};
 use bevy::render::{
     batching::gpu_preprocessing::GpuPreprocessingMode,
@@ -76,6 +76,8 @@ use bevy::render::{
 };
 
 use self::graph::{Core2d, Node2d};
+
+use super::upscaling::UpscalingNode;
 
 pub const CORE_2D_DEPTH_FORMAT: TextureFormat = TextureFormat::Depth32Float;
 
@@ -125,7 +127,7 @@ impl Plugin for Core2dPlugin {
             )
             .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPass)
             // .add_render_graph_node::<ViewNodeRunner<TonemappingNode>>(Core2d, Node2d::Tonemapping)
-            .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPassPostProcessing)
+            // .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPassPostProcessing)
             .add_render_graph_node::<ViewNodeRunner<UpscalingNode>>(Core2d, Node2d::Upscaling)
             .add_render_graph_edges(
                 Core2d,
@@ -136,7 +138,7 @@ impl Plugin for Core2dPlugin {
                     Node2d::MyMainTransparentPass,
                     Node2d::EndMainPass,
                     // Node2d::Tonemapping,
-                    Node2d::EndMainPassPostProcessing,
+                    // Node2d::EndMainPassPostProcessing,
                     Node2d::Upscaling,
                 ),
             );

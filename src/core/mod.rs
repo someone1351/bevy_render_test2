@@ -1,7 +1,8 @@
 
 pub mod core_2d;
-// pub mod fullscreen_vertex_shader;
-// pub mod upscaling;
+pub mod fullscreen_vertex_shader;
+pub mod upscaling;
+pub mod blit;
 
 // pub use skybox::Skybox;
 
@@ -34,10 +35,13 @@ pub mod core_2d;
 //     // tonemapping::TonemappingPlugin,
 //     upscaling::UpscalingPlugin,
 // };
-use bevy::app::{App, Plugin};
+use bevy::{app::{App, Plugin}, asset::load_internal_asset, prelude::Shader};
+use blit::BlitPlugin;
 // use bevy::asset::load_internal_asset;
 // use bevy::render::prelude::Shader;
 use core_2d::Core2dPlugin;
+use fullscreen_vertex_shader::FULLSCREEN_SHADER_HANDLE;
+use upscaling::UpscalingPlugin;
 // use oit::OrderIndependentTransparencyPlugin;
 
 #[derive(Default)]
@@ -45,21 +49,21 @@ pub struct CorePipelinePlugin;
 
 impl Plugin for CorePipelinePlugin {
     fn build(&self, app: &mut App) {
-        // load_internal_asset!(
-        //     app,
-        //     FULLSCREEN_SHADER_HANDLE,
-        //     "fullscreen_vertex_shader/fullscreen.wgsl",
-        //     Shader::from_wgsl
-        // );
+        load_internal_asset!(
+            app,
+            FULLSCREEN_SHADER_HANDLE,
+            "fullscreen_vertex_shader/fullscreen.wgsl",
+            Shader::from_wgsl
+        );
 
         app
             .add_plugins((
                 Core2dPlugin,
             ))
-            // .add_plugins((
-            //     BlitPlugin,
-            //     UpscalingPlugin,
-            // ))
+            .add_plugins((
+                BlitPlugin,
+                UpscalingPlugin,
+            ))
             ;
     }
 }
