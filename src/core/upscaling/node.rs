@@ -50,6 +50,8 @@ impl ViewNode for UpscalingNode {
             ClearColorConfig::Custom(color) => Some(color),
             ClearColorConfig::None => None,
         };
+        // let clear_color=Some(bevy::color::Color::linear_rgba(0.1, 0.9, 0.1, 1.0));
+
         let converted_clear_color = clear_color.map(Into::into);
         let upscaled_texture = target.main_texture_view();
 

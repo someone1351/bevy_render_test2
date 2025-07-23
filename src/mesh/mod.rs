@@ -27,18 +27,19 @@ use bevy::ecs::system::{lifetimeless::*, *};
 
 use bevy::render::render_phase::SetItemPipeline;
 
-
 use bevy::render::render_resource::*;
 
 use bevy::render::render_resource::{BufferUsages, RawBufferVec};
 
 use bevy::image::BevyDefault;
+
+use crate::core::core_2d::{Transparent2d, CORE_2D_DEPTH_FORMAT};
+
 // use bevy::transform::components::GlobalTransform;
 
-use crate::core::core_2d::mypass::MyTransparentUi;
+//use crate::core::core_2d::mypass::MyTransparentUi;
 
 // use bevy::prelude::*;
-
 //render component
 
 #[derive(Component)]
@@ -173,6 +174,7 @@ impl FromWorld for MyUiPipeline {
 
 impl SpecializedRenderPipeline for MyUiPipeline {
     type Key = MyUiPipelineKey;
+    // type Key = SpritePipelineKey;
 
     fn specialize(&self, _key: Self::Key) -> RenderPipelineDescriptor {
         let vertex_buffer_layout = VertexBufferLayout::from_vertex_formats(
@@ -213,8 +215,33 @@ impl SpecializedRenderPipeline for MyUiPipeline {
                 topology: PrimitiveTopology::TriangleList,
                 strip_index_format: None,
             },
-            depth_stencil:None,
+            // depth_stencil:None,
+            // depth_stencil:Some(DepthStencilState{
+            //     format: todo!(),
+            //     depth_write_enabled: todo!(),
+            //     depth_compare: todo!(),
+            //     stencil: todo!(),
+            //     bias: todo!() ,
+            // }),
+
+            depth_stencil: Some(DepthStencilState {
+                format: CORE_2D_DEPTH_FORMAT,
+                depth_write_enabled: false,
+                depth_compare: CompareFunction::GreaterEqual,
+                stencil: StencilState {
+                    front: StencilFaceState::IGNORE,
+                    back: StencilFaceState::IGNORE,
+                    read_mask: 0,
+                    write_mask: 0,
+                },
+                bias: DepthBiasState {
+                    constant: 0,
+                    slope_scale: 0.0,
+                    clamp: 0.0,
+                },
+            }),
             multisample: MultisampleState {
+                //count: key.msaa_samples(),
                 count: 4,
                 mask: !0,
                 alpha_to_coverage_enabled: false,
@@ -282,9 +309,11 @@ pub fn extract_uinodes(
         });
     }
 }
+
 //MainTransparentPass2dNode
 pub fn queue_uinodes(
-    transparent_draw_functions: Res<DrawFunctions<MyTransparentUi>>,
+    // transparent_draw_functions: Res<DrawFunctions<MyTransparentUi>>,
+    transparent_draw_functions: Res<DrawFunctions<Transparent2d>>,
 
     colored_mesh2d_pipeline: Res<MyUiPipeline>,
     mut pipelines: ResMut<SpecializedRenderPipelines<MyUiPipeline>>,
@@ -293,9 +322,10 @@ pub fn queue_uinodes(
     extracted_elements : Res<MyUiExtractedElements>,
     views: Query<(Entity, &ExtractedView)>,
 
-    // render_camera_query: Query<(Entity, &MyCameraView),  >,
+    // // render_camera_query: Query<(Entity, &MyCameraView),  >,
 
-    mut render_phases: ResMut<ViewSortedRenderPhases<MyTransparentUi>>,
+    // mut render_phases: ResMut<ViewSortedRenderPhases<MyTransparentUi>>,
+    mut render_phases: ResMut<ViewSortedRenderPhases<Transparent2d>>,
 ) {
 
     let draw_colored_mesh2d = transparent_draw_functions.read().get_id::<DrawMesh>().unwrap();
@@ -313,7 +343,16 @@ pub fn queue_uinodes(
         {
             let Some(transparent_phase) = render_phases.get_mut(&extracted_view.retained_view_entity) else {continue;};
 
-            transparent_phase.add(MyTransparentUi {
+            // transparent_phase.add(MyTransparentUi {
+            //     entity: element.entity, //what is it used for?
+            //     draw_function: draw_colored_mesh2d,
+            //     pipeline,
+            //     sort_key: FloatOrd(element.depth as f32),
+            //     batch_range: 0..1,
+            //     extra_index: PhaseItemExtraIndex::None,
+            // });
+
+            transparent_phase.add(Transparent2d {
                 entity: element.entity, //what is it used for?
                 draw_function: draw_colored_mesh2d,
                 pipeline,
@@ -321,7 +360,6 @@ pub fn queue_uinodes(
                 batch_range: 0..1,
                 extra_index: PhaseItemExtraIndex::None,
             });
-
             // println!("camera_render_entity1 {:?}",extracted_view.retained_view_entity);
         }
 
@@ -394,16 +432,17 @@ pub fn render_setup(app: &mut App) {
         .init_resource::<MyUiExtractedElements>()
         .init_resource::<MyUiPipeline>()
         .init_resource::<SpecializedRenderPipelines<MyUiPipeline>>()
-        // .init_resource::<DrawFunctions<MyTransparentUi>>()
-        // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>()
-        .add_render_command::<MyTransparentUi, DrawMesh>()
+        // // .init_resource::<DrawFunctions<MyTransparentUi>>()
+        // // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>()
+        // .add_render_command::<MyTransparentUi, DrawMesh>()
+        .add_render_command::<Transparent2d, DrawMesh>()
         .add_systems(ExtractSchedule,(
-            // extract_camera_view,
+            // // extract_camera_view,
             extract_uinodes
         ).chain())
         .add_systems( Render,(
             queue_uinodes.in_set(RenderSet::Queue),
-            // sort_phase_system::<MyTransparentUi>.in_set(RenderSet::PhaseSort),
+            // // sort_phase_system::<MyTransparentUi>.in_set(RenderSet::PhaseSort),
             prepare_uinodes.in_set(RenderSet::PrepareBindGroups),
         )) ;
 

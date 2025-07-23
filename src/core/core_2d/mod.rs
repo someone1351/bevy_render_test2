@@ -1,7 +1,7 @@
 mod camera_2d;
 mod main_opaque_pass_2d_node;
 mod main_transparent_pass_2d_node;
-pub mod mypass;
+// pub mod mypass;
 
 pub mod graph {
     use bevy::render::render_graph::{RenderLabel, RenderSubGraph};
@@ -15,20 +15,20 @@ pub mod graph {
 
     #[derive(Debug, Hash, PartialEq, Eq, Clone, RenderLabel)]
     pub enum Node2d {
-        MsaaWriteback,
+        // MsaaWriteback,
         StartMainPass,
         MainOpaquePass,
         MainTransparentPass,
-        MyMainTransparentPass,
+        // MyMainTransparentPass,
         EndMainPass,
-        Wireframe,
-        Bloom,
-        PostProcessing,
-        Tonemapping,
-        Fxaa,
-        Smaa,
+        // Wireframe,
+        // Bloom,
+        // PostProcessing,
+        // Tonemapping,
+        // Fxaa,
+        // Smaa,
         Upscaling,
-        ContrastAdaptiveSharpening,
+        // ContrastAdaptiveSharpening,
         EndMainPassPostProcessing,
     }
 }
@@ -46,7 +46,7 @@ use bevy::render::{
 pub use camera_2d::*;
 pub use main_opaque_pass_2d_node::*;
 pub use main_transparent_pass_2d_node::*;
-use mypass::{MyMainTransparentPass2dNode, MyTransparentUi};
+//use mypass::{MyMainTransparentPass2dNode, MyTransparentUi};
 
 // use crate::{
 //     // tonemapping::TonemappingNode,
@@ -95,8 +95,8 @@ impl Plugin for Core2dPlugin {
             .init_resource::<DrawFunctions<Opaque2d>>()
             .init_resource::<DrawFunctions<AlphaMask2d>>()
             .init_resource::<DrawFunctions<Transparent2d>>()
-            .init_resource::<DrawFunctions<MyTransparentUi>>() //
-            .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>() //
+            // .init_resource::<DrawFunctions<MyTransparentUi>>() //
+            // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>() //
             .init_resource::<ViewSortedRenderPhases<Transparent2d>>()
             .init_resource::<ViewBinnedRenderPhases<Opaque2d>>()
             .init_resource::<ViewBinnedRenderPhases<AlphaMask2d>>()
@@ -105,7 +105,7 @@ impl Plugin for Core2dPlugin {
                 Render,
                 (
                     sort_phase_system::<Transparent2d>.in_set(RenderSet::PhaseSort),
-                    sort_phase_system::<MyTransparentUi>.in_set(RenderSet::PhaseSort), //
+                    // sort_phase_system::<MyTransparentUi>.in_set(RenderSet::PhaseSort), //
                     prepare_core_2d_depth_textures.in_set(RenderSet::PrepareResources),
                 ),
             );
@@ -113,32 +113,23 @@ impl Plugin for Core2dPlugin {
         render_app
             .add_render_sub_graph(Core2d)
             .add_render_graph_node::<EmptyNode>(Core2d, Node2d::StartMainPass)
-            .add_render_graph_node::<ViewNodeRunner<MainOpaquePass2dNode>>(
-                Core2d,
-                Node2d::MainOpaquePass,
-            )
-            .add_render_graph_node::<ViewNodeRunner<MainTransparentPass2dNode>>(
-                Core2d,
-                Node2d::MainTransparentPass,
-            )
-            .add_render_graph_node::<ViewNodeRunner<MyMainTransparentPass2dNode>>(
-                Core2d,
-                Node2d::MyMainTransparentPass,
-            )
+            // // .add_render_graph_node::<ViewNodeRunner<MainOpaquePass2dNode>>(Core2d,Node2d::MainOpaquePass,)
+            .add_render_graph_node::<ViewNodeRunner<MainTransparentPass2dNode>>(Core2d,Node2d::MainTransparentPass,)
+            // .add_render_graph_node::<ViewNodeRunner<MyMainTransparentPass2dNode>>(Core2d,Node2d::MyMainTransparentPass)
             .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPass)
-            // .add_render_graph_node::<ViewNodeRunner<TonemappingNode>>(Core2d, Node2d::Tonemapping)
-            // .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPassPostProcessing)
+            // // // .add_render_graph_node::<ViewNodeRunner<TonemappingNode>>(Core2d, Node2d::Tonemapping)
+            // // // .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPassPostProcessing)
             .add_render_graph_node::<ViewNodeRunner<UpscalingNode>>(Core2d, Node2d::Upscaling)
             .add_render_graph_edges(
                 Core2d,
                 (
                     Node2d::StartMainPass,
-                    Node2d::MainOpaquePass,
+                    // // Node2d::MainOpaquePass,
                     Node2d::MainTransparentPass,
-                    Node2d::MyMainTransparentPass,
+                    // Node2d::MyMainTransparentPass,
                     Node2d::EndMainPass,
-                    // Node2d::Tonemapping,
-                    // Node2d::EndMainPassPostProcessing,
+                    // // // Node2d::Tonemapping,
+                    // // // Node2d::EndMainPassPostProcessing,
                     Node2d::Upscaling,
                 ),
             );
@@ -363,26 +354,29 @@ impl CachedRenderPipelinePhaseItem for AlphaMask2d {
 /// Transparent 2D [`SortedPhaseItem`]s.
 pub struct Transparent2d {
     pub sort_key: FloatOrd,
-    pub entity: (Entity, MainEntity),
+    // pub entity: (Entity, MainEntity),
+    pub entity: Entity,
     pub pipeline: CachedRenderPipelineId,
     pub draw_function: DrawFunctionId,
     pub batch_range: Range<u32>,
-    pub extracted_index: usize,
+    // pub extracted_index: usize,
     pub extra_index: PhaseItemExtraIndex,
-    /// Whether the mesh in question is indexed (uses an index buffer in
-    /// addition to its vertex buffer).
-    pub indexed: bool,
+    // Whether the mesh in question is indexed (uses an index buffer in
+    // addition to its vertex buffer).
+    // pub indexed: bool,
 }
 
 impl PhaseItem for Transparent2d {
     #[inline]
     fn entity(&self) -> Entity {
-        self.entity.0
+        // self.entity.0
+        self.entity
     }
 
     #[inline]
     fn main_entity(&self) -> MainEntity {
-        self.entity.1
+        // self.entity.1
+        MainEntity::from(Entity::PLACEHOLDER)
     }
 
     #[inline]
@@ -426,7 +420,8 @@ impl SortedPhaseItem for Transparent2d {
     }
 
     fn indexed(&self) -> bool {
-        self.indexed
+        // self.indexed
+        false
     }
 }
 
@@ -437,9 +432,83 @@ impl CachedRenderPipelinePhaseItem for Transparent2d {
     }
 }
 
+
+
+
+
+// pub struct MyTransparentUi {
+//     pub sort_key: FloatOrd,
+//     pub entity: Entity,
+//     pub pipeline: CachedRenderPipelineId,
+//     pub draw_function: DrawFunctionId,
+//     pub batch_range: Range<u32>, /// Range in the vertex buffer of this item
+//     pub extra_index: PhaseItemExtraIndex,
+// }
+
+// impl PhaseItem for MyTransparentUi {
+//     #[inline]
+//     fn entity(&self) -> Entity {
+//         self.entity
+//     }
+
+//     #[inline]
+//     fn draw_function(&self) -> DrawFunctionId {
+//         self.draw_function
+//     }
+
+//     #[inline]
+//     fn batch_range(&self) -> &Range<u32> {
+//         &self.batch_range
+//     }
+
+//     #[inline]
+//     fn batch_range_mut(&mut self) -> &mut Range<u32> {
+//         &mut self.batch_range
+//     }
+
+//     #[inline]
+//     fn extra_index(&self) -> PhaseItemExtraIndex {
+//         self.extra_index.clone()
+//     }
+
+//     #[inline]
+//     fn batch_range_and_extra_index_mut(&mut self) -> (&mut Range<u32>, &mut PhaseItemExtraIndex) {
+//         (&mut self.batch_range, &mut self.extra_index)
+//     }
+
+//     fn main_entity(&self) -> MainEntity {
+//         MainEntity::from(Entity::PLACEHOLDER) //what is main ntity?
+//     }
+// }
+
+// impl CachedRenderPipelinePhaseItem for MyTransparentUi {
+//     #[inline]
+//     fn cached_pipeline(&self) -> CachedRenderPipelineId {
+//         self.pipeline
+//     }
+// }
+
+// impl SortedPhaseItem for MyTransparentUi {
+//     type SortKey = FloatOrd;
+
+//     #[inline]
+//     fn sort_key(&self) -> Self::SortKey {
+//         self.sort_key
+//     }
+
+//     #[inline]
+//     fn sort(items: &mut [Self]) {
+//         items.sort_by_key(|item| item.sort_key());
+//     }
+
+//     fn indexed(&self) -> bool {
+//         false
+//     }
+// }
+
 pub fn extract_core_2d_camera_phases(
     mut transparent_2d_phases: ResMut<ViewSortedRenderPhases<Transparent2d>>,
-    mut my_render_phases: ResMut<ViewSortedRenderPhases<MyTransparentUi>>,
+    // mut my_render_phases: ResMut<ViewSortedRenderPhases<MyTransparentUi>>,
     mut opaque_2d_phases: ResMut<ViewBinnedRenderPhases<Opaque2d>>,
     mut alpha_mask_2d_phases: ResMut<ViewBinnedRenderPhases<AlphaMask2d>>,
     cameras_2d: Extract<Query<(Entity, &Camera), With<Camera2d>>>,
@@ -456,7 +525,7 @@ pub fn extract_core_2d_camera_phases(
         let retained_view_entity = RetainedViewEntity::new(main_entity.into(), None, 0);
 
         transparent_2d_phases.insert_or_clear(retained_view_entity);
-        my_render_phases.insert_or_clear(retained_view_entity); //
+        // my_render_phases.insert_or_clear(retained_view_entity); //
         opaque_2d_phases.prepare_for_new_frame(retained_view_entity, GpuPreprocessingMode::None);
         alpha_mask_2d_phases
             .prepare_for_new_frame(retained_view_entity, GpuPreprocessingMode::None);
@@ -466,7 +535,7 @@ pub fn extract_core_2d_camera_phases(
 
     // Clear out all dead views.
     transparent_2d_phases.retain(|camera_entity, _| live_entities.contains(camera_entity));
-    my_render_phases.retain(|camera_entity, _| live_entities.contains(camera_entity));
+    // my_render_phases.retain(|camera_entity, _| live_entities.contains(camera_entity));
     opaque_2d_phases.retain(|camera_entity, _| live_entities.contains(camera_entity));
     alpha_mask_2d_phases.retain(|camera_entity, _| live_entities.contains(camera_entity));
 }
@@ -476,7 +545,7 @@ pub fn prepare_core_2d_depth_textures(
     mut texture_cache: ResMut<TextureCache>,
     render_device: Res<RenderDevice>,
     transparent_2d_phases: Res<ViewSortedRenderPhases<Transparent2d>>,
-    my_render_phases: Res<ViewSortedRenderPhases<MyTransparentUi>>,
+    // my_render_phases: Res<ViewSortedRenderPhases<MyTransparentUi>>,
     opaque_2d_phases: Res<ViewBinnedRenderPhases<Opaque2d>>,
     views_2d: Query<(Entity, &ExtractedCamera, &ExtractedView, &Msaa), (With<Camera2d>,)>,
 ) {
@@ -484,7 +553,7 @@ pub fn prepare_core_2d_depth_textures(
     for (view, camera, extracted_view, msaa) in &views_2d {
         if !opaque_2d_phases.contains_key(&extracted_view.retained_view_entity)
             || !transparent_2d_phases.contains_key(&extracted_view.retained_view_entity)
-            || !my_render_phases.contains_key(&extracted_view.retained_view_entity)
+            // || !my_render_phases.contains_key(&extracted_view.retained_view_entity)
 
         {
             continue;

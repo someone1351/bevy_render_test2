@@ -1,12 +1,19 @@
 
 use std::collections::HashSet;
 
-use bevy::prelude::*;
+use bevy::{prelude::*, render::camera::Viewport, window::WindowResolution};
 use render_test2::{core::CorePipelinePlugin, mesh::{TestRenderComponent, TestRenderPlugin}};
 // use bevy::render::view::RenderLayers;
 // use render_test2::{render::camera::CameraMyTest, TestRenderComponent, TestRenderPlugin};
 // use bevy::color::palettes::basic::SILVER;
 
+/*
+
+* get_color_attachment returns a shared color tex?
+** is it automatically created and clear col applied?
+*** same with depth buf?
+
+*/
 fn main() {
     let mut app = App::new();
 
@@ -17,7 +24,10 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "render test".into(),
-                        resolution: (800.0, 600.0).into(),
+                        resolution: WindowResolution::new(1100.0, 600.0)
+                        // .sc
+                            .with_scale_factor_override(1.0)
+                            ,
                         resizable: true,
                         ..Default::default()
                     }),
@@ -28,7 +38,7 @@ fn main() {
         ))
 
         .add_systems(Startup, (
-            // setup_ui,
+            setup_ui,
             setup_2d,
             // setup_3d,
         ))
@@ -40,7 +50,14 @@ fn main() {
 
 pub fn setup_ui(
     // mut commands: Commands,
+    window: Single<&mut Window>
 ) {
+    println!("Scale is {} {} {}",
+        window.scale_factor(),
+        window.resolution.scale_factor(),
+        window.resolution.base_scale_factor()
+    );
+
     // commands.spawn((
     //     CameraMyTest{},
     //     // Camera2d::default(),
@@ -91,17 +108,29 @@ pub fn setup_2d(
     commands.spawn((
         render_test2::core::core_2d::Camera2d::default(),
         Camera {
-            order: 2,
+            order: 1,
             clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.1, 0.5)),
-            // viewport: Some(Viewport {
-            //     physical_position: UVec2::new(500, 0),
-            //     physical_size: UVec2::new(500, 500),
-            //     ..Default::default()
-            // }),
+            viewport: Some(Viewport {
+                physical_position: UVec2::new(0, 0),
+                physical_size: UVec2::new(500, 500),
+                ..Default::default()
+            }),
             ..Default::default()
         },
     ));
-
+    commands.spawn((
+        render_test2::core::core_2d::Camera2d::default(),
+        Camera {
+            order: 2,
+            clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.7, 0.1)),
+            viewport: Some(Viewport {
+                physical_position: UVec2::new(500, 0),
+                physical_size: UVec2::new(500, 500),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+    ));
     commands.spawn((
         TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
         // RenderLayers::layer(0),
