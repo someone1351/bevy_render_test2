@@ -1,11 +1,30 @@
 
+use bevy::color::Color;
 use bevy::ecs::resource::Resource;
 
+use bevy::prelude::Entity;
 use bevy::render::render_resource::{BufferUsages, RawBufferVec};
 
 
 
 //render resources
+
+#[derive(Clone,Debug)]
+pub struct MyUiExtractedElement{
+    pub x:f32,
+    pub y:f32,
+    pub x2:f32,
+    pub y2:f32,
+    pub color : Color,
+    pub depth:u32,
+    pub entity:Entity,
+    // pub camera_entity:Entity,
+}
+
+#[derive(Resource,Default,Debug)]
+pub struct MyUiExtractedElements {
+    pub elements : Vec<MyUiExtractedElement>,
+}
 
 
 #[repr(C)]
