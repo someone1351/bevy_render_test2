@@ -1,12 +1,9 @@
 
 // use bevy::ecs::prelude::*;
-use core::ops::Range;
 use std::collections::HashMap;
 
 use bevy::app::{App, Plugin};
-use bevy::asset::{load_internal_asset, weak_handle, Handle};
 use bevy::color::Color;
-// use bevy::core_pipeline::core_2d::mypass::MyTransparentUi;
 
 use bevy::ecs::component::Component;
 
@@ -15,25 +12,22 @@ use bevy::ecs::entity::Entity;
 use bevy::ecs::query::With;
 use bevy::ecs::resource::Resource;
 use bevy::ecs::schedule::IntoScheduleConfigs;
-use bevy::ecs::world::{FromWorld, World};
 use bevy::math::FloatOrd;
-// use bevy::render::camera::Camera;
-use bevy::render::mesh::PrimitiveTopology;
 use bevy::render::{render_phase::*, Extract, ExtractSchedule, Render, RenderApp, RenderSet};
 use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::sync_world::TemporaryRenderEntity;
-use bevy::render::view::{ExtractedView, ViewUniform, ViewUniformOffset, ViewUniforms};
-use bevy::ecs::system::{lifetimeless::*, *};
+use bevy::render::view::{ExtractedView, ViewUniforms};
+use bevy::ecs::system::*;
 
-use bevy::render::render_phase::SetItemPipeline;
 
 use bevy::render::render_resource::*;
 
-use bevy::render::render_resource::{BufferUsages, RawBufferVec};
 
-use bevy::image::BevyDefault;
+use phases::DrawMesh;
+use pipelines::{MyUiPipeline, MyUiPipelineKey};
+use shaders::setup_shaders;
 
-use crate::core::core_2d::{Transparent2d, CORE_2D_DEPTH_FORMAT};
+use crate::core::core_2d::Transparent2d;
 
 // use bevy::transform::components::GlobalTransform;
 
@@ -41,94 +35,16 @@ use crate::core::core_2d::{Transparent2d, CORE_2D_DEPTH_FORMAT};
 
 // use bevy::prelude::*;
 //render component
+pub mod pipelines;
+pub mod shaders;
+pub mod phases;
 
-#[derive(Component)]
-pub struct MyViewBindGroup {
-    pub value: BindGroup,
-}
+pub mod components;
+pub mod resources;
+pub mod systems;
 
-#[derive(Component, Default, Debug, Clone)]
-pub struct MyUiBatch {
-    pub range: Range<u32>,
-}
-
-//render phase
-
-
-pub struct SetViewBindGroup<const I: usize>;
-
-impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetViewBindGroup<I> {
-    type Param = ();//SQuery<(Read<ViewUniformOffset>, Read<MyViewBindGroup>)>;
-    type ViewQuery = (Read<ViewUniformOffset>, Read<MyViewBindGroup>);//Read<ViewUniformOffset>;
-    type ItemQuery = ();
-    #[inline]
-    fn render<'w>(
-        _item: &P,
-        (view_uniform,mesh2d_view_bind_group): (&'w ViewUniformOffset,&'w MyViewBindGroup), //view
-        _entity: Option<()>, //item
-        _view_query: SystemParamItem<'w, '_, Self::Param>, //param
-        pass: &mut TrackedRenderPass<'w>,
-
-    ) -> RenderCommandResult {
-        pass.set_bind_group(
-            I,
-            &mesh2d_view_bind_group.value,
-            &[view_uniform.offset]
-        );
-        RenderCommandResult::Success
-    }
-}
-
-pub struct SetDrawBuf;
-
-impl<P: PhaseItem> RenderCommand<P> for SetDrawBuf {
-    type Param = SRes<MyUiMeta> ;//(, SQuery<>);
-    type ViewQuery = ();
-    type ItemQuery = Read<MyUiBatch>;
-
-    #[inline]
-    fn render<'w>(
-        _item: &P,
-        _view : (), //view
-        batch : Option<&'w MyUiBatch>, //item
-        ui_meta : SystemParamItem<'w, '_, Self::Param>, //param
-        pass: &mut TrackedRenderPass<'w>,
-    ) -> RenderCommandResult {
-        let Some(batch) = batch else {return RenderCommandResult::Failure("...");};
-        pass.set_vertex_buffer(0, ui_meta.into_inner().vertices.buffer().unwrap().slice(..));
-        pass.draw(batch.range.clone(), 0..1);
-        RenderCommandResult::Success
-    }
-}
-
-pub type DrawMesh = (
-    SetItemPipeline,
-    SetViewBindGroup<0>,
-    SetDrawBuf,
-);
-
-//render resources
-
-
-#[repr(C)]
-#[derive(Copy, Clone, bytemuck::Pod, bytemuck::Zeroable)]
-pub struct MyUiVertex {
-    pub position: [f32; 3],
-    pub color: [f32; 4],//u32,
-}
-
-#[derive(Resource)]
-pub struct MyUiMeta {
-    pub vertices: RawBufferVec<MyUiVertex>,
-}
-
-impl Default for MyUiMeta {
-    fn default() -> Self {
-        Self {
-            vertices: RawBufferVec::new(BufferUsages::VERTEX),
-        }
-    }
-}
+use resources::*;
+use components::*;
 
 #[derive(Clone,Debug)]
 pub struct MyUiExtractedElement{
@@ -148,133 +64,6 @@ pub struct MyUiExtractedElements {
 }
 
 
-//shaders
-// pub const COLORED_MESH2D_SHADER_HANDLE: Handle<Shader> = Handle::weak_from_u128(5312396983770130001);
-pub const MY_COLORED_MESH2D_SHADER_HANDLE: Handle<Shader> = weak_handle!("0a991ecd-134f-4f82-adf5-0fcc86f02227");
-
-pub fn setup_shaders(app: &mut App) {
-    load_internal_asset!(app, MY_COLORED_MESH2D_SHADER_HANDLE, "my_mesh2d_col.wgsl", Shader::from_wgsl);
-}
-
-//pipeline
-
-
-#[derive(Resource,Clone)]
-pub struct MyUiPipeline {
-    pub view_layout: BindGroupLayout,
-}
-
-impl FromWorld for MyUiPipeline {
-    fn from_world(world: &mut World) -> Self {
-        MyUiPipeline {
-             view_layout : create_view_layout(world),
-        }
-    }
-}
-
-impl SpecializedRenderPipeline for MyUiPipeline {
-    type Key = MyUiPipelineKey;
-    // type Key = SpritePipelineKey;
-
-    fn specialize(&self, _key: Self::Key) -> RenderPipelineDescriptor {
-        let vertex_buffer_layout = VertexBufferLayout::from_vertex_formats(
-            VertexStepMode::Vertex,
-            vec![
-                VertexFormat::Float32x3,// position
-                VertexFormat::Float32x4,// color
-            ],
-        );
-
-        RenderPipelineDescriptor {
-            vertex: VertexState {
-                shader: MY_COLORED_MESH2D_SHADER_HANDLE,
-                entry_point: "vertex".into(),
-                shader_defs: Vec::new(),
-                buffers: vec![vertex_buffer_layout],
-            },
-            fragment: Some(FragmentState {
-                shader: MY_COLORED_MESH2D_SHADER_HANDLE,
-                shader_defs: Vec::new(),
-                entry_point: "fragment".into(),
-                targets: vec![Some(ColorTargetState {
-                    format: TextureFormat::bevy_default(),
-                    blend: Some(BlendState::ALPHA_BLENDING),
-                    write_mask: ColorWrites::ALL,
-                })],
-            }),
-            layout: vec![
-                self.view_layout.clone(), // Bind group 0 is the view uniform
-            ],
-            primitive: PrimitiveState {
-                // front_face: FrontFace::Ccw,
-                front_face: FrontFace::Cw,
-                cull_mode: Some(Face::Back),
-                unclipped_depth: false,
-                polygon_mode: PolygonMode::Fill,
-                conservative: false,
-                topology: PrimitiveTopology::TriangleList,
-                strip_index_format: None,
-            },
-            // depth_stencil:None,
-            // depth_stencil:Some(DepthStencilState{
-            //     format: todo!(),
-            //     depth_write_enabled: todo!(),
-            //     depth_compare: todo!(),
-            //     stencil: todo!(),
-            //     bias: todo!() ,
-            // }),
-
-            depth_stencil: Some(DepthStencilState {
-                format: CORE_2D_DEPTH_FORMAT,
-                depth_write_enabled: false,
-                depth_compare: CompareFunction::GreaterEqual,
-                stencil: StencilState {
-                    front: StencilFaceState::IGNORE,
-                    back: StencilFaceState::IGNORE,
-                    read_mask: 0,
-                    write_mask: 0,
-                },
-                bias: DepthBiasState {
-                    constant: 0,
-                    slope_scale: 0.0,
-                    clamp: 0.0,
-                },
-            }),
-            multisample: MultisampleState {
-                //count: key.msaa_samples(),
-                count: 4,
-                mask: !0,
-                alpha_to_coverage_enabled: false,
-            },
-            label: Some("my_colored_mesh2d_pipeline".into()),
-            push_constant_ranges: Vec::new(),
-            zero_initialize_workgroup_memory: false,
-        }
-    }
-}
-
-#[derive(PartialEq,Eq, Hash, Clone)]
-pub struct MyUiPipelineKey { }
-
-fn create_view_layout(world: &mut World) -> BindGroupLayout {
-    let render_device = world.resource::<RenderDevice>();
-
-    render_device.create_bind_group_layout(
-        Some("my_mesh2d_view_layout"),
-        &[
-            BindGroupLayoutEntry { // View
-                binding: 0,
-                visibility: ShaderStages::VERTEX | ShaderStages::FRAGMENT,
-                ty: BindingType::Buffer {
-                    ty: BufferBindingType::Uniform,
-                    has_dynamic_offset: true,
-                    min_binding_size: Some(ViewUniform::min_size()),
-                },
-                count: None,
-            },
-        ]
-    )
-}
 
 //systems
 
