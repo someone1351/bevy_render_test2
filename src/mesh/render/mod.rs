@@ -16,7 +16,7 @@ use draws::DrawMesh;
 use pipelines::MyUiPipeline;
 use shaders::setup_shaders;
 
-use crate::core::core_2d::Transparent2d;
+use crate::core::core_my::Transparent2d;
 
 // use bevy::transform::components::GlobalTransform;
 

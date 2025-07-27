@@ -11,14 +11,14 @@ use super::super::upscaling::UpscalingNode;
 use super::passes::*;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, RenderSubGraph)]
-pub struct Core2d;
+pub struct CoreMy;
 
 // pub mod input {
 //     pub const VIEW_ENTITY: &str = "view_entity";
 // }
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, RenderLabel)]
-pub enum Node2d {
+pub enum NodeMy {
     // MsaaWriteback,
     StartMainPass,
     // MainOpaquePass,
@@ -31,26 +31,26 @@ pub enum Node2d {
 pub fn setup_graph(render_app:&mut SubApp) {
 
     render_app
-        .add_render_sub_graph(Core2d)
-        .add_render_graph_node::<EmptyNode>(Core2d, Node2d::StartMainPass)
+        .add_render_sub_graph(CoreMy)
+        .add_render_graph_node::<EmptyNode>(CoreMy, NodeMy::StartMainPass)
         // // .add_render_graph_node::<ViewNodeRunner<MainOpaquePass2dNode>>(Core2d,Node2d::MainOpaquePass,)
-        .add_render_graph_node::<ViewNodeRunner<MainTransparentPass2dNode>>(Core2d,Node2d::MainTransparentPass,)
+        .add_render_graph_node::<ViewNodeRunner<MainTransparentPass2dNode>>(CoreMy,NodeMy::MainTransparentPass,)
         // .add_render_graph_node::<ViewNodeRunner<MyMainTransparentPass2dNode>>(Core2d,Node2d::MyMainTransparentPass)
-        .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPass)
+        .add_render_graph_node::<EmptyNode>(CoreMy, NodeMy::EndMainPass)
         // // // .add_render_graph_node::<ViewNodeRunner<TonemappingNode>>(Core2d, Node2d::Tonemapping)
         // // // .add_render_graph_node::<EmptyNode>(Core2d, Node2d::EndMainPassPostProcessing)
-        .add_render_graph_node::<ViewNodeRunner<UpscalingNode>>(Core2d, Node2d::Upscaling)
+        .add_render_graph_node::<ViewNodeRunner<UpscalingNode>>(CoreMy, NodeMy::Upscaling)
         .add_render_graph_edges(
-            Core2d,
+            CoreMy,
             (
-                Node2d::StartMainPass,
+                NodeMy::StartMainPass,
                 // // Node2d::MainOpaquePass,
-                Node2d::MainTransparentPass,
+                NodeMy::MainTransparentPass,
                 // Node2d::MyMainTransparentPass,
-                Node2d::EndMainPass,
+                NodeMy::EndMainPass,
                 // // // Node2d::Tonemapping,
                 // // // Node2d::EndMainPassPostProcessing,
-                Node2d::Upscaling,
+                NodeMy::Upscaling,
             ),
         );
 }

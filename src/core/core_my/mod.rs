@@ -30,12 +30,12 @@ pub use phases::*;
 
 
 pub const CORE_2D_DEPTH_FORMAT: TextureFormat = TextureFormat::Depth32Float;
-pub struct Core2dPlugin;
+pub struct CoreMyPlugin;
 
-impl Plugin for Core2dPlugin {
+impl Plugin for CoreMyPlugin {
     fn build(&self, app: &mut App) {
-        app.register_type::<Camera2d>()
-            .add_plugins(ExtractComponentPlugin::<Camera2d>::default());
+        app.register_type::<CameraMy>()
+            .add_plugins(ExtractComponentPlugin::<CameraMy>::default());
 
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;

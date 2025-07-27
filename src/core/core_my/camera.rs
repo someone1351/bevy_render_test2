@@ -11,7 +11,7 @@ use bevy::render::{
 };
 use bevy::transform::prelude::{GlobalTransform, Transform};
 
-use super::graph::Core2d;
+use super::graph::CoreMy;
 
 /// A 2D camera component. Enables the 2D render graph for a [`Camera`].
 #[derive(Component, Default, Reflect, Clone, ExtractComponent)]
@@ -20,9 +20,9 @@ use super::graph::Core2d;
 #[require(
     Camera,
     // DebandDither,
-    CameraRenderGraph::new(Core2d),
+    CameraRenderGraph::new(CoreMy),
     Projection::Orthographic(OrthographicProjection::default_2d()),
     Frustum = OrthographicProjection::default_2d().compute_frustum(&GlobalTransform::from(Transform::default())),
     // Tonemapping::None,
 )]
-pub struct Camera2d;
+pub struct CameraMy;

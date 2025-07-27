@@ -1,10 +1,10 @@
 
-pub mod core_2d;
+pub mod core_my;
 pub mod upscaling;
 
 use bevy::app::{App, Plugin};
 
-use core_2d::Core2dPlugin;
+use core_my::CoreMyPlugin;
 use upscaling::UpscalingPlugin;
 
 #[derive(Default)]
@@ -16,7 +16,7 @@ impl Plugin for CorePipelinePlugin {
 
         app
             .add_plugins((
-                Core2dPlugin,
+                CoreMyPlugin,
                 UpscalingPlugin,
             ))
             ;

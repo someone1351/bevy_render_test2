@@ -106,7 +106,7 @@ pub fn setup_2d(
     // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     commands.spawn((
-        render_test2::core::core_2d::Camera2d::default(),
+        render_test2::core::core_my::CameraMy::default(),
         Camera {
             order: 1,
             clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.1, 0.5)),
@@ -119,7 +119,7 @@ pub fn setup_2d(
         },
     ));
     commands.spawn((
-        render_test2::core::core_2d::Camera2d::default(),
+        render_test2::core::core_my::CameraMy::default(),
         Camera {
             order: 2,
             clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.7, 0.1)),

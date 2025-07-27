@@ -22,7 +22,7 @@ use super::pipelines::{MyUiPipeline, MyUiPipelineKey};
 use super::components::*;
 use super::resources::*;
 
-use crate::core::core_2d::Transparent2d;
+use crate::core::core_my::Transparent2d;
 use super::super::TestRenderComponent;
 
 
