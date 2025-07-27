@@ -1,5 +1,4 @@
-use bevy::app::{App, Plugin};
-use bevy::asset::{load_internal_asset, weak_handle, Handle};
+
 use bevy::ecs::prelude::*;
 use bevy::render::{
     render_resource::{
@@ -7,36 +6,9 @@ use bevy::render::{
         *,
     },
     renderer::RenderDevice,
-    RenderApp,
 };
 
-use super::fullscreen_vertex_shader::fullscreen_shader_vertex_state;
-
-// use crate::fullscreen_vertex_shader::fullscreen_shader_vertex_state;
-
-pub const BLIT_SHADER_HANDLE: Handle<Shader> = weak_handle!("19be3075-c34e-43e7-bf24-c8fe21a0192e");
-
-/// Adds support for specialized "blit pipelines", which can be used to write one texture to another.
-pub struct BlitPlugin;
-
-impl Plugin for BlitPlugin {
-    fn build(&self, app: &mut App) {
-        load_internal_asset!(app, BLIT_SHADER_HANDLE, "blit.wgsl", Shader::from_wgsl);
-
-        if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
-            render_app.allow_ambiguous_resource::<SpecializedRenderPipelines<BlitPipeline>>();
-        }
-    }
-
-    fn finish(&self, app: &mut App) {
-        let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
-            return;
-        };
-        render_app
-            .init_resource::<BlitPipeline>()
-            .init_resource::<SpecializedRenderPipelines<BlitPipeline>>();
-    }
-}
+use super::shaders::{fullscreen_shader_vertex_state, BLIT_SHADER_HANDLE};
 
 #[derive(Resource)]
 pub struct BlitPipeline {

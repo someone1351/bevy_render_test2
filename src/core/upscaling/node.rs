@@ -11,8 +11,8 @@ use bevy::render::{
 };
 use std::sync::Mutex;
 
-use super::super::blit::BlitPipeline;
-use super::ViewUpscalingPipeline;
+use super::pipelines::BlitPipeline;
+use super::components::ViewUpscalingPipeline;
 
 #[derive(Default)]
 pub struct UpscalingNode {
