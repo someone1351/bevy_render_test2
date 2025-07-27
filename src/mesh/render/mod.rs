@@ -12,7 +12,7 @@ use bevy::render::{render_phase::*, ExtractSchedule, Render, RenderApp, RenderSe
 use bevy::render::render_resource::*;
 
 
-use phases::DrawMesh;
+use draws::DrawMesh;
 use pipelines::MyUiPipeline;
 use shaders::setup_shaders;
 
@@ -26,7 +26,7 @@ use crate::core::core_2d::Transparent2d;
 //render component
 pub mod pipelines;
 pub mod shaders;
-pub mod phases;
+pub mod draws;
 
 pub mod components;
 pub mod resources;

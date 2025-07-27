@@ -17,7 +17,7 @@ use bevy::ecs::system::*;
 use bevy::render::render_resource::*;
 
 
-use super::phases::DrawMesh;
+use super::draws::DrawMesh;
 use super::pipelines::{MyUiPipeline, MyUiPipelineKey};
 use super::components::*;
 use super::resources::*;
