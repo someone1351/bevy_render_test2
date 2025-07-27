@@ -6,7 +6,7 @@ use bevy::render::{
     Render, RenderApp, RenderSet,
 };
 
-mod node;
+mod nodes;
 mod systems;
 mod components;
 
@@ -16,7 +16,7 @@ pub mod shaders;
 use pipelines::*;
 use systems::*;
 
-pub use node::UpscalingNode;
+pub use nodes::UpscalingNode;
 
 // use super::blit::{BlitPipeline, BlitPipelineKey};
 

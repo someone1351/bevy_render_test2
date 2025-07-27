@@ -21,9 +21,9 @@ use super::super::phases::*;
 
 
 #[derive(Default)]
-pub struct MainTransparentPass2dNode {}
+pub struct MainTransparentPassMyNode {}
 
-impl ViewNode for MainTransparentPass2dNode {
+impl ViewNode for MainTransparentPassMyNode {
     type ViewQuery = (
         &'static ExtractedCamera,
         &'static ExtractedView,
@@ -39,7 +39,7 @@ impl ViewNode for MainTransparentPass2dNode {
         world: &'w World,
     ) -> Result<(), NodeRunError> {
         let Some(transparent_phases) =
-            world.get_resource::<ViewSortedRenderPhases<Transparent2d>>()
+            world.get_resource::<ViewSortedRenderPhases<TransparentMy>>()
         else {
             return Ok(());
         };
@@ -64,16 +64,16 @@ impl ViewNode for MainTransparentPass2dNode {
             // Command encoder setup
             let mut command_encoder =
                 render_device.create_command_encoder(&CommandEncoderDescriptor {
-                    label: Some("main_transparent_pass_2d_command_encoder"),
+                    label: Some("main_transparent_pass_my_command_encoder"),
                 });
 
             // This needs to run at least once to clear the background color, even if there are no items to render
             {
                 #[cfg(feature = "trace")]
-                let _main_pass_2d = info_span!("main_transparent_pass_2d").entered();
+                let _main_pass_2d = info_span!("main_transparent_pass_my").entered();
 
                 let render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
-                    label: Some("main_transparent_pass_2d"),
+                    label: Some("main_transparent_pass_my"),
                     color_attachments: &color_attachments,
                     depth_stencil_attachment,
                     timestamp_writes: None,
@@ -81,7 +81,7 @@ impl ViewNode for MainTransparentPass2dNode {
                 });
                 let mut render_pass = TrackedRenderPass::new(&render_device, render_pass);
 
-                let pass_span = diagnostics.pass_span(&mut render_pass, "main_transparent_pass_2d");
+                let pass_span = diagnostics.pass_span(&mut render_pass, "main_transparent_pass_my");
 
                 if let Some(viewport) = camera.viewport.as_ref() {
                     render_pass.set_camera_viewport(viewport);
@@ -90,7 +90,7 @@ impl ViewNode for MainTransparentPass2dNode {
                 if !transparent_phase.items.is_empty() {
                     #[cfg(feature = "trace")]
                     let _transparent_main_pass_2d_span =
-                        info_span!("transparent_main_pass_2d").entered();
+                        info_span!("transparent_main_pass_my").entered();
                     if let Err(err) = transparent_phase.render(&mut render_pass, world, view_entity)
                     {
                         error!(
@@ -107,9 +107,9 @@ impl ViewNode for MainTransparentPass2dNode {
             #[cfg(all(feature = "webgl", target_arch = "wasm32", not(feature = "webgpu")))]
             if camera.viewport.is_some() {
                 #[cfg(feature = "trace")]
-                let _reset_viewport_pass_2d = info_span!("reset_viewport_pass_2d").entered();
+                let _reset_viewport_pass_2d = info_span!("reset_viewport_pass_my").entered();
                 let pass_descriptor = RenderPassDescriptor {
-                    label: Some("reset_viewport_pass_2d"),
+                    label: Some("reset_viewport_pass_my"),
                     color_attachments: &[Some(target.get_color_attachment())],
                     depth_stencil_attachment: None,
                     timestamp_writes: None,

@@ -21,8 +21,8 @@ use super::super::phases::*;
 /// A [`bevy::render::render_graph::Node`] that runs the
 /// [`Opaque2d`] [`ViewBinnedRenderPhases`] and [`AlphaMask2d`] [`ViewBinnedRenderPhases`]
 #[derive(Default)]
-pub struct MainOpaquePass2dNode;
-impl ViewNode for MainOpaquePass2dNode {
+pub struct MainOpaquePassMyNode;
+impl ViewNode for MainOpaquePassMyNode {
     type ViewQuery = (
         &'static ExtractedCamera,
         &'static ExtractedView,
@@ -38,8 +38,8 @@ impl ViewNode for MainOpaquePass2dNode {
         world: &'w World,
     ) -> Result<(), NodeRunError> {
         let (Some(opaque_phases), Some(alpha_mask_phases)) = (
-            world.get_resource::<ViewBinnedRenderPhases<Opaque2d>>(),
-            world.get_resource::<ViewBinnedRenderPhases<AlphaMask2d>>(),
+            world.get_resource::<ViewBinnedRenderPhases<OpaqueMy>>(),
+            world.get_resource::<ViewBinnedRenderPhases<AlphaMaskMy>>(),
         ) else {
             return Ok(());
         };
@@ -58,7 +58,7 @@ impl ViewNode for MainOpaquePass2dNode {
         };
         render_context.add_command_buffer_generation_task(move |render_device| {
             #[cfg(feature = "trace")]
-            let _main_opaque_pass_2d_span = info_span!("main_opaque_pass_2d").entered();
+            let _main_opaque_pass_2d_span = info_span!("main_opaque_pass_my").entered();
 
             // Command encoder setup
             let mut command_encoder =
@@ -68,14 +68,14 @@ impl ViewNode for MainOpaquePass2dNode {
 
             // Render pass setup
             let render_pass = command_encoder.begin_render_pass(&RenderPassDescriptor {
-                label: Some("main_opaque_pass_2d"),
+                label: Some("main_opaque_pass_my"),
                 color_attachments: &color_attachments,
                 depth_stencil_attachment,
                 timestamp_writes: None,
                 occlusion_query_set: None,
             });
             let mut render_pass = TrackedRenderPass::new(&render_device, render_pass);
-            let pass_span = diagnostics.pass_span(&mut render_pass, "main_opaque_pass_2d");
+            let pass_span = diagnostics.pass_span(&mut render_pass, "main_opaque_pass_my");
 
             if let Some(viewport) = camera.viewport.as_ref() {
                 render_pass.set_camera_viewport(viewport);
@@ -84,7 +84,7 @@ impl ViewNode for MainOpaquePass2dNode {
             // Opaque draws
             if !opaque_phase.is_empty() {
                 #[cfg(feature = "trace")]
-                let _opaque_main_pass_2d_span = info_span!("opaque_main_pass_2d").entered();
+                let _opaque_main_pass_2d_span = info_span!("opaque_main_pass_my").entered();
                 if let Err(err) = opaque_phase.render(&mut render_pass, world, view_entity) {
                     error!("Error encountered while rendering the 2d opaque phase {err:?}");
                 }
@@ -93,7 +93,7 @@ impl ViewNode for MainOpaquePass2dNode {
             // Alpha mask draws
             if !alpha_mask_phase.is_empty() {
                 #[cfg(feature = "trace")]
-                let _alpha_mask_main_pass_2d_span = info_span!("alpha_mask_main_pass_2d").entered();
+                let _alpha_mask_main_pass_2d_span = info_span!("alpha_mask_main_pass_my").entered();
                 if let Err(err) = alpha_mask_phase.render(&mut render_pass, world, view_entity) {
                     error!("Error encountered while rendering the 2d alpha mask phase {err:?}");
                 }

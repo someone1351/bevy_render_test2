@@ -15,7 +15,7 @@ use bevy::render::{
 
 
 /// Transparent 2D [`SortedPhaseItem`]s.
-pub struct Transparent2d {
+pub struct TransparentMy {
     pub sort_key: FloatOrd,
     // pub entity: (Entity, MainEntity),
     pub entity: Entity,
@@ -29,7 +29,7 @@ pub struct Transparent2d {
     // pub indexed: bool,
 }
 
-impl PhaseItem for Transparent2d {
+impl PhaseItem for TransparentMy {
     #[inline]
     fn entity(&self) -> Entity {
         // self.entity.0
@@ -68,7 +68,7 @@ impl PhaseItem for Transparent2d {
     }
 }
 
-impl SortedPhaseItem for Transparent2d {
+impl SortedPhaseItem for TransparentMy {
     type SortKey = FloatOrd;
 
     #[inline]
@@ -88,7 +88,7 @@ impl SortedPhaseItem for Transparent2d {
     }
 }
 
-impl CachedRenderPipelinePhaseItem for Transparent2d {
+impl CachedRenderPipelinePhaseItem for TransparentMy {
     #[inline]
     fn cached_pipeline(&self) -> CachedRenderPipelineId {
         self.pipeline

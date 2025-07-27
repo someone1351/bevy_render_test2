@@ -15,19 +15,19 @@ use bevy::render::{
     sync_world::MainEntity,
 };
 
-use super::BatchSetKey2d;
+use super::BatchSetKeyMy;
 
 
 
 /// Opaque 2D [`BinnedPhaseItem`]s.
-pub struct Opaque2d {
+pub struct OpaqueMy {
     /// Determines which objects can be placed into a *batch set*.
     ///
     /// Objects in a single batch set can potentially be multi-drawn together,
     /// if it's enabled and the current platform supports it.
-    pub batch_set_key: BatchSetKey2d,
+    pub batch_set_key: BatchSetKeyMy,
     /// The key, which determines which can be batched.
-    pub bin_key: Opaque2dBinKey,
+    pub bin_key: OpaqueMyBinKey,
     /// An entity from which data will be fetched, including the mesh if
     /// applicable.
     pub representative_entity: (Entity, MainEntity),
@@ -40,7 +40,7 @@ pub struct Opaque2d {
 
 /// Data that must be identical in order to batch phase items together.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Opaque2dBinKey {
+pub struct OpaqueMyBinKey {
     /// The identifier of the render pipeline.
     pub pipeline: CachedRenderPipelineId,
     /// The function used to draw.
@@ -54,7 +54,7 @@ pub struct Opaque2dBinKey {
     pub material_bind_group_id: Option<BindGroupId>,
 }
 
-impl PhaseItem for Opaque2d {
+impl PhaseItem for OpaqueMy {
     #[inline]
     fn entity(&self) -> Entity {
         self.representative_entity.0
@@ -88,12 +88,12 @@ impl PhaseItem for Opaque2d {
     }
 }
 
-impl BinnedPhaseItem for Opaque2d {
+impl BinnedPhaseItem for OpaqueMy {
     // Since 2D meshes presently can't be multidrawn, the batch set key is
     // irrelevant.
-    type BatchSetKey = BatchSetKey2d;
+    type BatchSetKey = BatchSetKeyMy;
 
-    type BinKey = Opaque2dBinKey;
+    type BinKey = OpaqueMyBinKey;
 
     fn new(
         batch_set_key: Self::BatchSetKey,
@@ -102,7 +102,7 @@ impl BinnedPhaseItem for Opaque2d {
         batch_range: Range<u32>,
         extra_index: PhaseItemExtraIndex,
     ) -> Self {
-        Opaque2d {
+        OpaqueMy {
             batch_set_key,
             bin_key,
             representative_entity,
@@ -112,7 +112,7 @@ impl BinnedPhaseItem for Opaque2d {
     }
 }
 
-impl CachedRenderPipelinePhaseItem for Opaque2d {
+impl CachedRenderPipelinePhaseItem for OpaqueMy {
     #[inline]
     fn cached_pipeline(&self) -> CachedRenderPipelineId {
         self.bin_key.pipeline

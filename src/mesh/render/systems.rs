@@ -22,7 +22,7 @@ use super::pipelines::{MyUiPipeline, MyUiPipelineKey};
 use super::components::*;
 use super::resources::*;
 
-use crate::core::core_my::Transparent2d;
+use crate::core::core_my::TransparentMy;
 use super::super::TestRenderComponent;
 
 
@@ -63,7 +63,7 @@ pub fn extract_uinodes(
 //MainTransparentPass2dNode
 pub fn queue_uinodes(
     // transparent_draw_functions: Res<DrawFunctions<MyTransparentUi>>,
-    transparent_draw_functions: Res<DrawFunctions<Transparent2d>>,
+    transparent_draw_functions: Res<DrawFunctions<TransparentMy>>,
 
     colored_mesh2d_pipeline: Res<MyUiPipeline>,
     mut pipelines: ResMut<SpecializedRenderPipelines<MyUiPipeline>>,
@@ -75,7 +75,7 @@ pub fn queue_uinodes(
     // // render_camera_query: Query<(Entity, &MyCameraView),  >,
 
     // mut render_phases: ResMut<ViewSortedRenderPhases<MyTransparentUi>>,
-    mut render_phases: ResMut<ViewSortedRenderPhases<Transparent2d>>,
+    mut render_phases: ResMut<ViewSortedRenderPhases<TransparentMy>>,
 ) {
 
     let draw_colored_mesh2d = transparent_draw_functions.read().get_id::<DrawMesh>().unwrap();
@@ -102,7 +102,7 @@ pub fn queue_uinodes(
             //     extra_index: PhaseItemExtraIndex::None,
             // });
 
-            transparent_phase.add(Transparent2d {
+            transparent_phase.add(TransparentMy {
                 entity: element.entity, //what is it used for?
                 draw_function: draw_colored_mesh2d,
                 pipeline,

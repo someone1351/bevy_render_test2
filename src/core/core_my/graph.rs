@@ -8,7 +8,7 @@ use bevy::{app::SubApp, render::render_graph::{RenderLabel, RenderSubGraph}};
 
 use super::super::upscaling::UpscalingNode;
 
-use super::passes::*;
+use super::nodes::*;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, RenderSubGraph)]
 pub struct CoreMy;
@@ -34,7 +34,7 @@ pub fn setup_graph(render_app:&mut SubApp) {
         .add_render_sub_graph(CoreMy)
         .add_render_graph_node::<EmptyNode>(CoreMy, NodeMy::StartMainPass)
         // // .add_render_graph_node::<ViewNodeRunner<MainOpaquePass2dNode>>(Core2d,Node2d::MainOpaquePass,)
-        .add_render_graph_node::<ViewNodeRunner<MainTransparentPass2dNode>>(CoreMy,NodeMy::MainTransparentPass,)
+        .add_render_graph_node::<ViewNodeRunner<MainTransparentPassMyNode>>(CoreMy,NodeMy::MainTransparentPass,)
         // .add_render_graph_node::<ViewNodeRunner<MyMainTransparentPass2dNode>>(Core2d,Node2d::MyMainTransparentPass)
         .add_render_graph_node::<EmptyNode>(CoreMy, NodeMy::EndMainPass)
         // // // .add_render_graph_node::<ViewNodeRunner<TonemappingNode>>(Core2d, Node2d::Tonemapping)

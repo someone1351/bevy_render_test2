@@ -1,5 +1,5 @@
 mod camera;
-mod passes;
+mod nodes;
 mod graph;
 mod systems;
 
@@ -7,7 +7,7 @@ pub use camera::*;
 use systems::*;
 
 use graph::setup_graph;
-pub use passes::*;
+pub use nodes::*;
 
 
 use bevy::render::render_resource::TextureFormat;
@@ -41,19 +41,19 @@ impl Plugin for CoreMyPlugin {
             return;
         };
         render_app
-            .init_resource::<DrawFunctions<Opaque2d>>()
-            .init_resource::<DrawFunctions<AlphaMask2d>>()
-            .init_resource::<DrawFunctions<Transparent2d>>()
+            .init_resource::<DrawFunctions<OpaqueMy>>()
+            .init_resource::<DrawFunctions<AlphaMaskMy>>()
+            .init_resource::<DrawFunctions<TransparentMy>>()
             // .init_resource::<DrawFunctions<MyTransparentUi>>() //
             // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>() //
-            .init_resource::<ViewSortedRenderPhases<Transparent2d>>()
-            .init_resource::<ViewBinnedRenderPhases<Opaque2d>>()
-            .init_resource::<ViewBinnedRenderPhases<AlphaMask2d>>()
+            .init_resource::<ViewSortedRenderPhases<TransparentMy>>()
+            .init_resource::<ViewBinnedRenderPhases<OpaqueMy>>()
+            .init_resource::<ViewBinnedRenderPhases<AlphaMaskMy>>()
             .add_systems(ExtractSchedule, extract_core_2d_camera_phases)
             .add_systems(
                 Render,
                 (
-                    sort_phase_system::<Transparent2d>.in_set(RenderSet::PhaseSort),
+                    sort_phase_system::<TransparentMy>.in_set(RenderSet::PhaseSort),
                     // sort_phase_system::<MyTransparentUi>.in_set(RenderSet::PhaseSort), //
                     prepare_core_2d_depth_textures.in_set(RenderSet::PrepareResources),
                 ),

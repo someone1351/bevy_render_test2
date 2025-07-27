@@ -27,10 +27,10 @@ use super::{phases::*, CORE_2D_DEPTH_FORMAT};
 use super::camera::*;
 
 pub fn extract_core_2d_camera_phases(
-    mut transparent_2d_phases: ResMut<ViewSortedRenderPhases<Transparent2d>>,
+    mut transparent_2d_phases: ResMut<ViewSortedRenderPhases<TransparentMy>>,
     // mut my_render_phases: ResMut<ViewSortedRenderPhases<MyTransparentUi>>,
-    mut opaque_2d_phases: ResMut<ViewBinnedRenderPhases<Opaque2d>>,
-    mut alpha_mask_2d_phases: ResMut<ViewBinnedRenderPhases<AlphaMask2d>>,
+    mut opaque_2d_phases: ResMut<ViewBinnedRenderPhases<OpaqueMy>>,
+    mut alpha_mask_2d_phases: ResMut<ViewBinnedRenderPhases<AlphaMaskMy>>,
     cameras_2d: Extract<Query<(Entity, &Camera), With<CameraMy>>>,
     mut live_entities: Local<HashSet<RetainedViewEntity>>,
 ) {
@@ -64,9 +64,9 @@ pub fn prepare_core_2d_depth_textures(
     mut commands: Commands,
     mut texture_cache: ResMut<TextureCache>,
     render_device: Res<RenderDevice>,
-    transparent_2d_phases: Res<ViewSortedRenderPhases<Transparent2d>>,
+    transparent_2d_phases: Res<ViewSortedRenderPhases<TransparentMy>>,
     // my_render_phases: Res<ViewSortedRenderPhases<MyTransparentUi>>,
-    opaque_2d_phases: Res<ViewBinnedRenderPhases<Opaque2d>>,
+    opaque_2d_phases: Res<ViewBinnedRenderPhases<OpaqueMy>>,
     views_2d: Query<(Entity, &ExtractedCamera, &ExtractedView, &Msaa), (With<CameraMy>,)>,
 ) {
     let mut textures = <HashMap<_, _>>::default();

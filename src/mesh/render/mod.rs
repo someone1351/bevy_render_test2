@@ -16,7 +16,7 @@ use draws::DrawMesh;
 use pipelines::MyUiPipeline;
 use shaders::setup_shaders;
 
-use crate::core::core_my::Transparent2d;
+use crate::core::core_my::TransparentMy;
 
 // use bevy::transform::components::GlobalTransform;
 
@@ -48,7 +48,7 @@ pub fn render_setup(app: &mut App) {
         // // .init_resource::<DrawFunctions<MyTransparentUi>>()
         // // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>()
         // .add_render_command::<MyTransparentUi, DrawMesh>()
-        .add_render_command::<Transparent2d, DrawMesh>()
+        .add_render_command::<TransparentMy, DrawMesh>()
         .add_systems(ExtractSchedule,(
             // // extract_camera_view,
             extract_uinodes

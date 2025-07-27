@@ -15,18 +15,18 @@ use bevy::render::{
     sync_world::MainEntity,
 };
 
-use super::BatchSetKey2d;
+use super::BatchSetKeyMy;
 
 
 /// Alpha mask 2D [`BinnedPhaseItem`]s.
-pub struct AlphaMask2d {
+pub struct AlphaMaskMy {
     /// Determines which objects can be placed into a *batch set*.
     ///
     /// Objects in a single batch set can potentially be multi-drawn together,
     /// if it's enabled and the current platform supports it.
-    pub batch_set_key: BatchSetKey2d,
+    pub batch_set_key: BatchSetKeyMy,
     /// The key, which determines which can be batched.
-    pub bin_key: AlphaMask2dBinKey,
+    pub bin_key: AlphaMaskMyBinKey,
     /// An entity from which data will be fetched, including the mesh if
     /// applicable.
     pub representative_entity: (Entity, MainEntity),
@@ -39,7 +39,7 @@ pub struct AlphaMask2d {
 
 /// Data that must be identical in order to batch phase items together.
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct AlphaMask2dBinKey {
+pub struct AlphaMaskMyBinKey {
     /// The identifier of the render pipeline.
     pub pipeline: CachedRenderPipelineId,
     /// The function used to draw.
@@ -53,7 +53,7 @@ pub struct AlphaMask2dBinKey {
     pub material_bind_group_id: Option<BindGroupId>,
 }
 
-impl PhaseItem for AlphaMask2d {
+impl PhaseItem for AlphaMaskMy {
     #[inline]
     fn entity(&self) -> Entity {
         self.representative_entity.0
@@ -88,12 +88,12 @@ impl PhaseItem for AlphaMask2d {
     }
 }
 
-impl BinnedPhaseItem for AlphaMask2d {
+impl BinnedPhaseItem for AlphaMaskMy {
     // Since 2D meshes presently can't be multidrawn, the batch set key is
     // irrelevant.
-    type BatchSetKey = BatchSetKey2d;
+    type BatchSetKey = BatchSetKeyMy;
 
-    type BinKey = AlphaMask2dBinKey;
+    type BinKey = AlphaMaskMyBinKey;
 
     fn new(
         batch_set_key: Self::BatchSetKey,
@@ -102,7 +102,7 @@ impl BinnedPhaseItem for AlphaMask2d {
         batch_range: Range<u32>,
         extra_index: PhaseItemExtraIndex,
     ) -> Self {
-        AlphaMask2d {
+        AlphaMaskMy {
             batch_set_key,
             bin_key,
             representative_entity,
@@ -112,7 +112,7 @@ impl BinnedPhaseItem for AlphaMask2d {
     }
 }
 
-impl CachedRenderPipelinePhaseItem for AlphaMask2d {
+impl CachedRenderPipelinePhaseItem for AlphaMaskMy {
     #[inline]
     fn cached_pipeline(&self) -> CachedRenderPipelineId {
         self.bin_key.pipeline
