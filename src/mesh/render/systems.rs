@@ -7,9 +7,10 @@ use std::collections::HashMap;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::query::With;
 use bevy::math::FloatOrd;
+use bevy::prelude::Msaa;
 use bevy::render::{render_phase::*, Extract};
 use bevy::render::renderer::{RenderDevice, RenderQueue};
-use bevy::render::sync_world::TemporaryRenderEntity;
+use bevy::render::sync_world::{MainEntity, TemporaryRenderEntity};
 use bevy::render::view::{ExtractedView, ViewUniforms};
 use bevy::ecs::system::*;
 
@@ -18,7 +19,7 @@ use bevy::render::render_resource::*;
 
 
 use super::draws::DrawMesh;
-use super::pipelines::{MyUiPipeline, MyUiPipelineKey};
+use super::pipelines::*;
 use super::components::*;
 use super::resources::*;
 
@@ -70,7 +71,12 @@ pub fn queue_uinodes(
     pipeline_cache: Res<PipelineCache>,
 
     extracted_elements : Res<MyUiExtractedElements>,
-    views: Query<(Entity, &ExtractedView)>,
+    views: Query<(
+        // Entity, &ExtractedView
+        &MainEntity,
+        &ExtractedView,
+        &Msaa,
+    )>,
 
     // // render_camera_query: Query<(Entity, &MyCameraView),  >,
 
@@ -79,28 +85,33 @@ pub fn queue_uinodes(
 ) {
 
     let draw_colored_mesh2d = transparent_draw_functions.read().get_id::<DrawMesh>().unwrap();
-    let pipeline = pipelines.specialize(&pipeline_cache, &colored_mesh2d_pipeline,MyUiPipelineKey{});
 
     // Iterate each view (a camera is a view)
 
-    for element in extracted_elements.elements.iter() {
-        // let Ok((view_entity, _view)) = views.get_mut(element.camera_entity) else {
-        //     continue;
-        // };
-        // for (view_entity,_view) in views.iter()
-        // for (camera_render_entity,_camera_view) in render_camera_query.iter()
-        for (_view_entiy,extracted_view) in views.iter()
-        {
-            let Some(transparent_phase) = render_phases.get_mut(&extracted_view.retained_view_entity) else {continue;};
+    // let Ok((view_entity, _view)) = views.get_mut(element.camera_entity) else {
+    //     continue;
+    // };
+    // for (view_entity,_view) in views.iter()
+    // for (camera_render_entity,_camera_view) in render_camera_query.iter()
+    for (
+        //_view_entiy
+        _main_entity,
+        extracted_view,msaa) in views.iter()
+    {
+        let Some(transparent_phase) = render_phases.get_mut(&extracted_view.retained_view_entity) else {continue;};
 
-            // transparent_phase.add(MyTransparentUi {
-            //     entity: element.entity, //what is it used for?
-            //     draw_function: draw_colored_mesh2d,
-            //     pipeline,
-            //     sort_key: FloatOrd(element.depth as f32),
-            //     batch_range: 0..1,
-            //     extra_index: PhaseItemExtraIndex::None,
-            // });
+        let pipeline = pipelines.specialize(&pipeline_cache, &colored_mesh2d_pipeline,MyUiPipelineKey{ msaa_samples: msaa.samples() });
+
+        // transparent_phase.add(MyTransparentUi {
+        //     entity: element.entity, //what is it used for?
+        //     draw_function: draw_colored_mesh2d,
+        //     pipeline,
+        //     sort_key: FloatOrd(element.depth as f32),
+        //     batch_range: 0..1,
+        //     extra_index: PhaseItemExtraIndex::None,
+        // });
+
+        for element in extracted_elements.elements.iter() {
 
             transparent_phase.add(TransparentMy {
                 entity: element.entity, //what is it used for?

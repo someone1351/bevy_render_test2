@@ -8,7 +8,7 @@ use bevy::{app::SubApp, render::render_graph::{RenderLabel, RenderSubGraph}};
 
 use super::super::upscaling::UpscalingNode;
 
-use super::nodes::*;
+use super::passes::*;
 
 #[derive(Debug, Hash, PartialEq, Eq, Clone, RenderSubGraph)]
 pub struct CoreMy;

@@ -1,5 +1,5 @@
 mod camera;
-mod nodes;
+mod passes;
 mod graph;
 mod systems;
 
@@ -7,7 +7,7 @@ pub use camera::*;
 use systems::*;
 
 use graph::setup_graph;
-pub use nodes::*;
+pub use passes::*;
 
 
 use bevy::render::render_resource::TextureFormat;

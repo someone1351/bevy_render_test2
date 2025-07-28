@@ -37,7 +37,7 @@ impl SpecializedRenderPipeline for MyUiPipeline {
     type Key = MyUiPipelineKey;
     // type Key = SpritePipelineKey;
 
-    fn specialize(&self, _key: Self::Key) -> RenderPipelineDescriptor {
+    fn specialize(&self, key: Self::Key) -> RenderPipelineDescriptor {
         let vertex_buffer_layout = VertexBufferLayout::from_vertex_formats(
             VertexStepMode::Vertex,
             vec![
@@ -101,9 +101,11 @@ impl SpecializedRenderPipeline for MyUiPipeline {
                     clamp: 0.0,
                 },
             }),
+            // multisample: MultisampleState::default(),
             multisample: MultisampleState {
-                //count: key.msaa_samples(),
-                count: 4,
+                // count: key.msaa_samples(),
+                count: key.msaa_samples,
+                // count: 4,
                 mask: !0,
                 alpha_to_coverage_enabled: false,
             },
@@ -115,7 +117,9 @@ impl SpecializedRenderPipeline for MyUiPipeline {
 }
 
 #[derive(PartialEq,Eq, Hash, Clone)]
-pub struct MyUiPipelineKey { }
+pub struct MyUiPipelineKey {
+    pub msaa_samples:u32,
+}
 
 
 
