@@ -4,6 +4,8 @@ use bevy::ecs::resource::Resource;
 
 use bevy::prelude::Entity;
 use bevy::render::render_resource::{BufferUsages, RawBufferVec};
+use bevy::render::sync_world::MainEntity;
+use bevy::render::view::RenderLayers;
 
 
 
@@ -18,7 +20,9 @@ pub struct MyUiExtractedElement{
     pub color : Color,
     pub depth:u32,
     pub entity:Entity,
+    pub main_entity:MainEntity,
     // pub camera_entity:Entity,
+    pub render_layers:Option<RenderLayers>,
 }
 
 #[derive(Resource,Default,Debug)]

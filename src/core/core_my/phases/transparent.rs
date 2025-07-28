@@ -17,8 +17,8 @@ use bevy::render::{
 /// Transparent 2D [`SortedPhaseItem`]s.
 pub struct TransparentMy {
     pub sort_key: FloatOrd,
-    // pub entity: (Entity, MainEntity),
-    pub entity: Entity,
+    pub entity: (Entity, MainEntity),
+    // pub entity: Entity,
     pub pipeline: CachedRenderPipelineId,
     pub draw_function: DrawFunctionId,
     pub batch_range: Range<u32>,
@@ -32,14 +32,14 @@ pub struct TransparentMy {
 impl PhaseItem for TransparentMy {
     #[inline]
     fn entity(&self) -> Entity {
-        // self.entity.0
-        self.entity
+        self.entity.0
+        // self.entity
     }
 
     #[inline]
     fn main_entity(&self) -> MainEntity {
-        // self.entity.1
-        MainEntity::from(Entity::PLACEHOLDER)
+        self.entity.1
+        // MainEntity::from(Entity::PLACEHOLDER)
     }
 
     #[inline]

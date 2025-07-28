@@ -1,7 +1,7 @@
 
 use std::collections::HashSet;
 
-use bevy::{prelude::*, render::camera::Viewport, window::WindowResolution};
+use bevy::{prelude::*, render::{camera::Viewport, view::RenderLayers}, window::WindowResolution};
 use render_test2::{core::CorePipelinePlugin, mesh::{TestRenderComponent, TestRenderPlugin}};
 // use bevy::render::view::RenderLayers;
 // use render_test2::{render::camera::CameraMyTest, TestRenderComponent, TestRenderPlugin};
@@ -117,6 +117,7 @@ pub fn setup_2d(
             }),
             ..Default::default()
         },
+        RenderLayers::layer(0),
     ));
     commands.spawn((
         render_test2::core::core_my::CameraMy::default(),
@@ -130,15 +131,13 @@ pub fn setup_2d(
             }),
             ..Default::default()
         },
+        RenderLayers::layer(1),
     ));
     commands.spawn((
         TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
-        // RenderLayers::layer(0),
-            Transform::from_xyz(
-                0.0,
-                0.0,
-                0.0,
-            ),
+        // RenderLayers::layer(1),
+        RenderLayers::from_layers(&[0,1]),
+        Transform::from_xyz( 0.0, 0.0, 0.0, ),
     ));
     // let num_shapes = 5;
 

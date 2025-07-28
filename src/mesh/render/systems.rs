@@ -11,7 +11,7 @@ use bevy::prelude::Msaa;
 use bevy::render::{render_phase::*, Extract};
 use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::sync_world::{MainEntity, TemporaryRenderEntity};
-use bevy::render::view::{ExtractedView, ViewUniforms};
+use bevy::render::view::{ExtractedView, RenderLayers, ViewUniforms};
 use bevy::ecs::system::*;
 
 
@@ -31,7 +31,11 @@ use super::super::TestRenderComponent;
 
 pub fn extract_uinodes(
     mut commands: Commands,
-    uinode_query: Extract<Query<(Entity,&TestRenderComponent,)> >,
+    uinode_query: Extract<Query<(
+        Entity,
+        &TestRenderComponent,
+        Option<&RenderLayers>,
+    )> >,
     mut extracted_elements : ResMut<MyUiExtractedElements>,
     // default_ui_camera: Extract<MyDefaultUiCamera>,
     // cameras: Extract<Query<(RenderEntity, &MyCameraView), With<CameraTest>, >>,
@@ -47,9 +51,11 @@ pub fn extract_uinodes(
 
     // let camera_entity=render_camera_entity;
 
-    for (_entity, test, ) in uinode_query.iter() {
+    for (entity, test, render_layers, ) in uinode_query.iter() {
+
         extracted_elements.elements.push(MyUiExtractedElement{
             entity:commands.spawn((TemporaryRenderEntity,)).id(), //is this needed? instead spawn entity later?
+            main_entity:entity.into(),
             // camera_entity,
             x: test.x,
             y: test.y,
@@ -57,6 +63,7 @@ pub fn extract_uinodes(
             y2: test.y+test.h,
             color: test.col,
             depth: 0,
+            render_layers: render_layers.cloned(),
         });
     }
 }
@@ -76,6 +83,7 @@ pub fn queue_uinodes(
         &MainEntity,
         &ExtractedView,
         &Msaa,
+        Option<&RenderLayers>,
     )>,
 
     // // render_camera_query: Query<(Entity, &MyCameraView),  >,
@@ -96,25 +104,35 @@ pub fn queue_uinodes(
     for (
         //_view_entiy
         _main_entity,
-        extracted_view,msaa) in views.iter()
-    {
-        let Some(transparent_phase) = render_phases.get_mut(&extracted_view.retained_view_entity) else {continue;};
+        extracted_view,
+        msaa,
+        render_layers,
+    ) in views.iter() {
+        let Some(transparent_phase) = render_phases.get_mut(&extracted_view.retained_view_entity) else {
+            //skip transparent phases that aren't for my camera
+            continue;
+        };
+
+        // if let Some(render_layers)=render_layers {
+        //     for x in render_layers.iter() {
+
+        //     }
+
+        // }
 
         let pipeline = pipelines.specialize(&pipeline_cache, &colored_mesh2d_pipeline,MyUiPipelineKey{ msaa_samples: msaa.samples() });
 
-        // transparent_phase.add(MyTransparentUi {
-        //     entity: element.entity, //what is it used for?
-        //     draw_function: draw_colored_mesh2d,
-        //     pipeline,
-        //     sort_key: FloatOrd(element.depth as f32),
-        //     batch_range: 0..1,
-        //     extra_index: PhaseItemExtraIndex::None,
-        // });
-
         for element in extracted_elements.elements.iter() {
+            if let Some(render_layers)=render_layers {
+                let intersects_count=element.render_layers.as_ref().map(|x|x.intersection(render_layers).iter().count()).unwrap_or(0);
+
+                if intersects_count==0 {
+                    continue;
+                }
+            }
 
             transparent_phase.add(TransparentMy {
-                entity: element.entity, //what is it used for?
+                entity: (element.entity,element.main_entity), //what is it used for?
                 draw_function: draw_colored_mesh2d,
                 pipeline,
                 sort_key: FloatOrd(element.depth as f32),
