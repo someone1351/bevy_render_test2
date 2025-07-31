@@ -23,12 +23,14 @@ use super::shaders::MY_COLORED_MESH2D_SHADER_HANDLE;
 #[derive(Resource,Clone)]
 pub struct MyUiPipeline {
     pub view_layout: BindGroupLayout,
+    pub image_layout: BindGroupLayout, //added
 }
 
 impl FromWorld for MyUiPipeline {
     fn from_world(world: &mut World) -> Self {
         MyUiPipeline {
              view_layout : create_view_layout(world),
+             image_layout : create_image_layout(world), //added
         }
     }
 }
@@ -43,6 +45,7 @@ impl SpecializedRenderPipeline for MyUiPipeline {
             vec![
                 VertexFormat::Float32x3,// position
                 VertexFormat::Float32x4,// color
+                VertexFormat::Float32x2,// tex //added
             ],
         );
 
@@ -65,6 +68,7 @@ impl SpecializedRenderPipeline for MyUiPipeline {
             }),
             layout: vec![
                 self.view_layout.clone(), // Bind group 0 is the view uniform
+                self.image_layout.clone(), //added
             ],
             primitive: PrimitiveState {
                 // front_face: FrontFace::Ccw,
@@ -76,14 +80,6 @@ impl SpecializedRenderPipeline for MyUiPipeline {
                 topology: PrimitiveTopology::TriangleList,
                 strip_index_format: None,
             },
-            // depth_stencil:None,
-            // depth_stencil:Some(DepthStencilState{
-            //     format: todo!(),
-            //     depth_write_enabled: todo!(),
-            //     depth_compare: todo!(),
-            //     stencil: todo!(),
-            //     bias: todo!() ,
-            // }),
 
             depth_stencil: Some(DepthStencilState {
                 format: CORE_2D_DEPTH_FORMAT,
@@ -140,5 +136,32 @@ fn create_view_layout(world: &mut World) -> BindGroupLayout {
                 count: None,
             },
         ]
+    )
+}
+
+
+fn create_image_layout(world: &mut World) -> BindGroupLayout { //added
+    let render_device = world.resource::<RenderDevice>();
+
+    render_device.create_bind_group_layout(
+        Some("my_ui_image_layout"),
+        &[
+            BindGroupLayoutEntry {
+                binding: 0,
+                visibility: ShaderStages::FRAGMENT,
+                ty: BindingType::Texture {
+                    multisampled: false,
+                    sample_type: TextureSampleType::Float { filterable: true },
+                    view_dimension: TextureViewDimension::D2,
+                },
+                count: None,
+            },
+            BindGroupLayoutEntry {
+                binding: 1,
+                visibility: ShaderStages::FRAGMENT,
+                ty: BindingType::Sampler(SamplerBindingType::Filtering),
+                count: None,
+            },
+        ],
     )
 }

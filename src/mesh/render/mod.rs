@@ -1,7 +1,7 @@
 
 // use bevy::ecs::prelude::*;
 
-use bevy::app::App;
+use bevy::app::{App, Startup};
 
 
 use bevy::ecs::schedule::IntoScheduleConfigs;
@@ -31,6 +31,7 @@ pub mod draws;
 pub mod components;
 pub mod resources;
 pub mod systems;
+pub mod dummy_image;
 
 use resources::*;
 // use components::*;
@@ -43,12 +44,14 @@ pub fn render_setup(app: &mut App) {
     render_app
         .init_resource::<MyUiMeta>()
         .init_resource::<MyUiExtractedElements>()
+        .init_resource::<MyUiImageBindGroups>()
         .init_resource::<MyUiPipeline>()
         .init_resource::<SpecializedRenderPipelines<MyUiPipeline>>()
         // // .init_resource::<DrawFunctions<MyTransparentUi>>()
         // // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>()
         // .add_render_command::<MyTransparentUi, DrawMesh>()
         .add_render_command::<TransparentMy, DrawMesh>()
+        // .add_systems(Startup, (dummy_image_setup,))
         .add_systems(ExtractSchedule,(
             // // extract_camera_view,
             extract_uinodes
@@ -56,7 +59,7 @@ pub fn render_setup(app: &mut App) {
         .add_systems( Render,(
             queue_uinodes.in_set(RenderSet::Queue),
             // // sort_phase_system::<MyTransparentUi>.in_set(RenderSet::PhaseSort),
-            prepare_uinodes.in_set(RenderSet::PrepareBindGroups),
+            (prepare_images,prepare_uinodes).chain().in_set(RenderSet::PrepareBindGroups),
         )) ;
 
     setup_shaders(app);

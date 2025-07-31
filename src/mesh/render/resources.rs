@@ -1,9 +1,12 @@
 
+use bevy::asset::{AssetId, Handle};
 use bevy::color::Color;
 use bevy::ecs::resource::Resource;
 
+use bevy::image::Image;
+use bevy::platform::collections::HashMap;
 use bevy::prelude::Entity;
-use bevy::render::render_resource::{BufferUsages, RawBufferVec};
+use bevy::render::render_resource::{BindGroup, BufferUsages, RawBufferVec};
 use bevy::render::sync_world::MainEntity;
 use bevy::render::view::RenderLayers;
 
@@ -23,6 +26,8 @@ pub struct MyUiExtractedElement{
     pub main_entity:MainEntity,
     // pub camera_entity:Entity,
     pub render_layers:Option<RenderLayers>,
+
+    pub image : Option<Handle<Image>>,
 }
 
 #[derive(Resource,Default,Debug)]
@@ -36,6 +41,7 @@ pub struct MyUiExtractedElements {
 pub struct MyUiVertex {
     pub position: [f32; 3],
     pub color: [f32; 4],//u32,
+    pub uv: [f32; 2], //
 }
 
 #[derive(Resource)]
@@ -50,3 +56,10 @@ impl Default for MyUiMeta {
         }
     }
 }
+
+
+#[derive(Resource,Default)]
+pub struct MyUiImageBindGroups {
+    pub values: HashMap<Option<AssetId<Image>>, BindGroup>,
+}
+

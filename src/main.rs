@@ -102,6 +102,7 @@ pub fn setup_ui(
 
 pub fn setup_2d(
     mut commands: Commands,
+    asset_server: Res<AssetServer>,
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
@@ -134,7 +135,10 @@ pub fn setup_2d(
         RenderLayers::layer(1),
     ));
     commands.spawn((
-        TestRenderComponent{ col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0, },
+        TestRenderComponent{
+            col: Color::srgb(1.0,0.2,0.6), x: 0.0, y: 0.0, w: 50.0, h: 50.0,
+            handle:asset_server.load("bevy_logo_dark_big.png"),
+        },
         // RenderLayers::layer(1),
         RenderLayers::from_layers(&[0,1]),
         Transform::from_xyz( 0.0, 0.0, 0.0, ),

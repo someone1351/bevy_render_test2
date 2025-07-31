@@ -60,8 +60,39 @@ impl<P: PhaseItem> RenderCommand<P> for SetDrawBuf {
     }
 }
 
+
+pub struct SetColorTextureBindGroup<const I: usize>;
+
+#[allow(unused_parens)]
+impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetColorTextureBindGroup<I> {
+    type Param = SRes<MyUiImageBindGroups>;
+    type ViewQuery = ();
+    type ItemQuery = Read<MyUiBatch>;
+
+    fn render<'w>(
+        _item: &P,
+        _view: (), //view
+        batch : Option<&'w MyUiBatch>, //item
+        image_bind_groups : SystemParamItem<'w, '_, Self::Param>, //param
+        pass: &mut TrackedRenderPass<'w>,
+    ) -> RenderCommandResult {
+        let Some(batch) = batch else { return RenderCommandResult::Failure("..."); };
+        let image_bind_groups = image_bind_groups.into_inner();
+
+        let Some(bind_group) = image_bind_groups.values.get(&batch.image_handle.as_ref().map(|x|x.id())) else {
+            return RenderCommandResult::Failure("my tex image missing");
+        };
+
+        pass.set_bind_group( I, bind_group, &[], );
+        // println!("drawing4");
+        RenderCommandResult::Success
+    }
+}
+
 pub type DrawMesh = (
     SetItemPipeline,
     SetViewBindGroup<0>,
+    SetColorTextureBindGroup<1>,
     SetDrawBuf,
 );
+

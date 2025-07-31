@@ -4,10 +4,14 @@ use std::collections::HashMap;
 
 
 
+use bevy::asset::AssetEvent;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::query::With;
+use bevy::image::Image;
 use bevy::math::FloatOrd;
-use bevy::prelude::Msaa;
+use bevy::prelude::{EventReader, Msaa};
+use bevy::render::render_asset::RenderAssets;
+use bevy::render::texture::GpuImage;
 use bevy::render::{render_phase::*, Extract};
 use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::sync_world::{MainEntity, TemporaryRenderEntity};
@@ -19,6 +23,7 @@ use bevy::render::render_resource::*;
 
 
 use super::draws::DrawMesh;
+use super::dummy_image::create_dummy_image;
 use super::pipelines::*;
 use super::components::*;
 use super::resources::*;
@@ -28,6 +33,108 @@ use super::super::TestRenderComponent;
 
 
 //systems
+// pub fn dummy_image_setup(
+//     render_device: Res<RenderDevice>,
+//     render_queue: Res<RenderQueue>,
+//     mesh2d_pipeline: Res<MyUiPipeline>,
+//     mut image_bind_groups: ResMut<MyUiImageBindGroups>,
+// ) {
+//     let gpu_image=create_dummy_image(&render_device,&render_queue);
+
+//     let bind_group=render_device.create_bind_group(
+//         "my_ui_material_bind_group",
+//         &mesh2d_pipeline.image_layout, &[
+//             BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+//             BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+//         ]
+//     );
+
+//     image_bind_groups.values.insert(None, bind_group);
+// }
+
+pub fn prepare_images(
+    mut commands: Commands,
+    render_device: Res<RenderDevice>,
+
+        render_queue: Res<RenderQueue>,
+
+    extracted_elements : Res<MyUiExtractedElements>,
+    mesh2d_pipeline: Res<MyUiPipeline>,
+    view_uniforms: Res<ViewUniforms>,
+    extracted_views: Query<Entity, With<ExtractedView>>,
+
+    mut image_bind_groups: ResMut<MyUiImageBindGroups>,
+    // mut image_asset_events: EventReader<AssetEvent<Image>>,
+
+    image_asset_events: Res<bevy::sprite::SpriteAssetEvents>,
+    gpu_images: Res<RenderAssets<GpuImage>>,
+    // dummy_gpu_image : Res<DummyGpuImage>,
+
+    mut init:Local<bool>,
+) {
+    if !*init {
+        *init=true;
+
+        let gpu_image=create_dummy_image(&render_device,&render_queue);
+
+        let bind_group=render_device.create_bind_group(
+            "my_ui_material_bind_group",
+            &mesh2d_pipeline.image_layout, &[
+                BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+                BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+            ]
+        );
+
+        image_bind_groups.values.insert(None, bind_group);
+    }
+    if let Some(view_binding) = view_uniforms.uniforms.binding() {
+        for view_entity in extracted_views.iter() {
+            let view_bind_group = render_device.create_bind_group(
+                "my_mesh2d_view_bind_group",&mesh2d_pipeline.view_layout,&[BindGroupEntry {
+                    binding: 0,
+                    resource: view_binding.clone(),
+                }],);
+
+            commands.entity(view_entity).insert(MyViewBindGroup { value: view_bind_group, });
+        }
+    }
+
+    //
+
+    // for event in image_asset_events.read()
+    for event in &image_asset_events.images
+    {
+        match event {
+            AssetEvent::Removed { id } | AssetEvent::Modified { id } => {
+                image_bind_groups.values.remove(&Some(id.clone()));//.unwrap();
+            }
+            _ =>{}
+        }
+    }
+
+    //
+    for element in extracted_elements.elements.iter()
+    {
+        let image_id=element.image.clone().map(|x|x.id());
+
+        //
+        if !image_bind_groups.values.contains_key(&image_id) {
+            let gpu_image=image_id.and_then(|image_id|gpu_images.get(image_id));
+            let bind_group=gpu_image.map(|gpu_image|render_device.create_bind_group(
+                "my_ui_material_bind_group",
+                &mesh2d_pipeline.image_layout, &[
+                    BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+                    BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+                ]
+            ));
+
+            if let Some(bind_group)=bind_group {
+                image_bind_groups.values.insert(image_id, bind_group);
+            }
+        }
+    }
+}
+
 
 pub fn extract_uinodes(
     mut commands: Commands,
@@ -64,6 +171,7 @@ pub fn extract_uinodes(
             color: test.col,
             depth: 0,
             render_layers: render_layers.cloned(),
+            image: Some(test.handle.clone()),
         });
     }
 }
@@ -151,22 +259,8 @@ pub fn prepare_uinodes(
     render_queue: Res<RenderQueue>,
     extracted_elements : Res<MyUiExtractedElements>,
     mut ui_meta: ResMut<MyUiMeta>,
-    mesh2d_pipeline: Res<MyUiPipeline>,
-    view_uniforms: Res<ViewUniforms>,
-    extracted_views: Query<Entity, With<ExtractedView>>,
 ) {
 
-    if let Some(view_binding) = view_uniforms.uniforms.binding() {
-        for view_entity in extracted_views.iter() {
-            let view_bind_group = render_device.create_bind_group(
-                "my_mesh2d_view_bind_group",&mesh2d_pipeline.view_layout,&[BindGroupEntry {
-                    binding: 0,
-                    resource: view_binding.clone(),
-                }],);
-
-            commands.entity(view_entity).insert(MyViewBindGroup { value: view_bind_group, });
-        }
-    }
 
     //
     ui_meta.vertices.clear();
@@ -175,7 +269,7 @@ pub fn prepare_uinodes(
     let mut batches = HashMap::<Entity,MyUiBatch>::new();
 
     for element in extracted_elements.elements.iter() {
-        let mut batch = MyUiBatch { range :0..0, };
+        let mut batch = MyUiBatch { range :0..0, image_handle: element.image.clone() };
         batch.range.start=ui_meta.vertices.len() as u32;
 
         let pos = vec![
@@ -183,9 +277,19 @@ pub fn prepare_uinodes(
             [element.x,element.y,0.0], [element.x2,element.y2,0.0],[element.x2,element.y,0.0],
         ];
 
+        let tex=vec![
+            [0.0,1.0],[1.0,1.0],[0.0,0.0],
+            [0.0,0.0],[1.0,1.0],[1.0,0.0],
+        ];
+
         let col=element.color.to_linear();
         for i in 0..6 {
-            ui_meta.vertices.push(MyUiVertex { position: pos[i], color : [col.red,col.green,col.blue,col.alpha], });
+            ui_meta.vertices.push(MyUiVertex {
+                position: pos[i],
+                color : [col.red,col.green,col.blue,col.alpha],
+                uv: tex[i],
+
+            });
         }
 
         batch.range.end=ui_meta.vertices.len() as u32;
