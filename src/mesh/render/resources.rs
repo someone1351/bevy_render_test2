@@ -63,3 +63,4 @@ pub struct MyUiImageBindGroups {
     pub values: HashMap<Option<AssetId<Image>>, BindGroup>,
 }
 
+

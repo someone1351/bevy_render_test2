@@ -4,7 +4,7 @@ use bevy::{
         // ImageSampler,
         TextureFormatPixelInfo,
     },
-    render::{render_resource::{AddressMode, FilterMode, SamplerDescriptor, TexelCopyBufferLayout, TextureViewDescriptor}, renderer::{RenderDevice, RenderQueue}, texture::{DefaultImageSampler, GpuImage}}
+    render::{render_resource::{AddressMode, FilterMode, SamplerDescriptor, TexelCopyBufferLayout, TextureViewDescriptor}, renderer::{RenderDevice, RenderQueue}, texture::GpuImage}
 };
 
 pub fn create_dummy_image(render_device: &RenderDevice, render_queue:&RenderQueue,

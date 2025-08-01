@@ -33,76 +33,54 @@ use super::super::TestRenderComponent;
 
 
 //systems
-// pub fn dummy_image_setup(
-//     render_device: Res<RenderDevice>,
-//     render_queue: Res<RenderQueue>,
-//     mesh2d_pipeline: Res<MyUiPipeline>,
-//     mut image_bind_groups: ResMut<MyUiImageBindGroups>,
-// ) {
-//     let gpu_image=create_dummy_image(&render_device,&render_queue);
 
-//     let bind_group=render_device.create_bind_group(
-//         "my_ui_material_bind_group",
-//         &mesh2d_pipeline.image_layout, &[
-//             BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
-//             BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
-//         ]
-//     );
-
-//     image_bind_groups.values.insert(None, bind_group);
-// }
-
-pub fn prepare_images(
-    mut commands: Commands,
+pub fn dummy_image_setup(
     render_device: Res<RenderDevice>,
-
-        render_queue: Res<RenderQueue>,
-
-    extracted_elements : Res<MyUiExtractedElements>,
+    render_queue: Res<RenderQueue>,
     mesh2d_pipeline: Res<MyUiPipeline>,
-    view_uniforms: Res<ViewUniforms>,
-    extracted_views: Query<Entity, With<ExtractedView>>,
-
     mut image_bind_groups: ResMut<MyUiImageBindGroups>,
-    // mut image_asset_events: EventReader<AssetEvent<Image>>,
-
-    image_asset_events: Res<bevy::sprite::SpriteAssetEvents>,
-    gpu_images: Res<RenderAssets<GpuImage>>,
-    // dummy_gpu_image : Res<DummyGpuImage>,
-
     mut init:Local<bool>,
 ) {
-    if !*init {
-        *init=true;
 
-        let gpu_image=create_dummy_image(&render_device,&render_queue);
-
-        let bind_group=render_device.create_bind_group(
-            "my_ui_material_bind_group",
-            &mesh2d_pipeline.image_layout, &[
-                BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
-                BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
-            ]
-        );
-
-        image_bind_groups.values.insert(None, bind_group);
-    }
-    if let Some(view_binding) = view_uniforms.uniforms.binding() {
-        for view_entity in extracted_views.iter() {
-            let view_bind_group = render_device.create_bind_group(
-                "my_mesh2d_view_bind_group",&mesh2d_pipeline.view_layout,&[BindGroupEntry {
-                    binding: 0,
-                    resource: view_binding.clone(),
-                }],);
-
-            commands.entity(view_entity).insert(MyViewBindGroup { value: view_bind_group, });
-        }
+    if *init {
+        return;
     }
 
-    //
+    *init=true;
 
-    // for event in image_asset_events.read()
-    for event in &image_asset_events.images
+
+    let gpu_image=create_dummy_image(&render_device,&render_queue);
+
+    let bind_group=render_device.create_bind_group(
+        "my_ui_material_bind_group",
+        &mesh2d_pipeline.image_layout, &[
+            BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+            BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+        ]
+    );
+
+    image_bind_groups.values.insert(None, bind_group);
+}
+
+
+
+
+
+pub fn extract_images(
+    // mut commands: Commands,
+    uinode_query: Extract<Query<(
+        Entity,
+        &TestRenderComponent,
+    )> >,
+    mut image_asset_events: Extract<EventReader<AssetEvent<Image>>>,
+
+    render_device: Res<RenderDevice>,
+    mesh2d_pipeline: Res<MyUiPipeline>,
+    mut image_bind_groups: ResMut<MyUiImageBindGroups>,
+    gpu_images: Res<RenderAssets<GpuImage>>,
+) {
+
+    for event in image_asset_events.read()
     {
         match event {
             AssetEvent::Removed { id } | AssetEvent::Modified { id } => {
@@ -112,29 +90,30 @@ pub fn prepare_images(
         }
     }
 
-    //
-    for element in extracted_elements.elements.iter()
-    {
-        let image_id=element.image.clone().map(|x|x.id());
-
+    for (_entity, test,  ) in uinode_query.iter() {
+        // let image_id=element.image.clone().map(|x|x.id());
+        let image_id=test.handle.id();
         //
-        if !image_bind_groups.values.contains_key(&image_id) {
-            let gpu_image=image_id.and_then(|image_id|gpu_images.get(image_id));
-            let bind_group=gpu_image.map(|gpu_image|render_device.create_bind_group(
-                "my_ui_material_bind_group",
-                &mesh2d_pipeline.image_layout, &[
-                    BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
-                    BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
-                ]
-            ));
+        if image_bind_groups.values.contains_key(&Some(image_id)) {
+            continue;
+        }
 
-            if let Some(bind_group)=bind_group {
-                image_bind_groups.values.insert(image_id, bind_group);
-            }
+        // let gpu_image=image_id.and_then(|image_id|gpu_images.get(image_id));
+        let gpu_image=gpu_images.get(image_id);
+
+        let bind_group=gpu_image.map(|gpu_image|render_device.create_bind_group(
+            "my_ui_material_bind_group",
+            &mesh2d_pipeline.image_layout, &[
+                BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+                BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+            ]
+        ));
+
+        if let Some(bind_group)=bind_group {
+            image_bind_groups.values.insert(Some(image_id), bind_group);
         }
     }
 }
-
 
 pub fn extract_uinodes(
     mut commands: Commands,
@@ -252,6 +231,29 @@ pub fn queue_uinodes(
 
     }
 }
+
+
+pub fn prepare_views(
+    mut commands: Commands,
+    render_device: Res<RenderDevice>,
+    mesh2d_pipeline: Res<MyUiPipeline>,
+    view_uniforms: Res<ViewUniforms>,
+    extracted_views: Query<Entity, With<ExtractedView>>,
+) {
+    if let Some(view_binding) = view_uniforms.uniforms.binding() {
+        for view_entity in extracted_views.iter() {
+            let view_bind_group = render_device.create_bind_group(
+                "my_mesh2d_view_bind_group",&mesh2d_pipeline.view_layout,&[BindGroupEntry {
+                    binding: 0,
+                    resource: view_binding.clone(),
+                }],);
+
+            commands.entity(view_entity).insert(MyViewBindGroup { value: view_bind_group, });
+        }
+    }
+}
+
+
 
 pub fn prepare_uinodes(
     mut commands: Commands,
