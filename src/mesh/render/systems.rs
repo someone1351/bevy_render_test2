@@ -188,17 +188,22 @@ pub fn queue_uinodes(
     // };
     // for (view_entity,_view) in views.iter()
     // for (camera_render_entity,_camera_view) in render_camera_query.iter()
+
+    let default_render_layers = RenderLayers::layer(0);
+
     for (
         //_view_entiy
         _main_entity,
         extracted_view,
         msaa,
-        render_layers,
+        view_render_layers,
     ) in views.iter() {
         let Some(transparent_phase) = render_phases.get_mut(&extracted_view.retained_view_entity) else {
             //skip transparent phases that aren't for my camera
             continue;
         };
+        let view_render_layers=view_render_layers.unwrap_or(&default_render_layers);
+
 
         // if let Some(render_layers)=render_layers {
         //     for x in render_layers.iter() {
@@ -210,12 +215,11 @@ pub fn queue_uinodes(
         let pipeline = pipelines.specialize(&pipeline_cache, &colored_mesh2d_pipeline,MyUiPipelineKey{ msaa_samples: msaa.samples() });
 
         for element in extracted_elements.elements.iter() {
-            if let Some(render_layers)=render_layers {
-                let intersects_count=element.render_layers.as_ref().map(|x|x.intersection(render_layers).iter().count()).unwrap_or(0);
 
-                if intersects_count==0 {
-                    continue;
-                }
+            let element_render_layers=element.render_layers.as_ref().unwrap_or(&default_render_layers);
+
+            if element_render_layers.intersection(view_render_layers).iter().count()==0 {
+                continue;
             }
 
             transparent_phase.add(TransparentMy {

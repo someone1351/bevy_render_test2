@@ -41,7 +41,7 @@ pub struct MyUiExtractedElements {
 pub struct MyUiVertex {
     pub position: [f32; 3],
     pub color: [f32; 4],//u32,
-    pub uv: [f32; 2], //
+    pub uv: [f32; 2], //added
 }
 
 #[derive(Resource)]
