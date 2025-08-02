@@ -91,12 +91,16 @@ pub fn extract_images(
     }
 
     for (_entity, test,  ) in uinode_query.iter() {
-        // let image_id=element.image.clone().map(|x|x.id());
-        let image_id=test.handle.id();
+        let image_id=test.handle.clone().map(|x|x.id());
+        // let image_id=test.handle.id();
         //
-        if image_bind_groups.values.contains_key(&Some(image_id)) {
+        if image_bind_groups.values.contains_key(&image_id) {
             continue;
         }
+
+        let Some(image_id)=image_id else {
+            continue;
+        };
 
         // let gpu_image=image_id.and_then(|image_id|gpu_images.get(image_id));
         let gpu_image=gpu_images.get(image_id);
@@ -150,7 +154,7 @@ pub fn extract_uinodes(
             color: test.col,
             depth: 0,
             render_layers: render_layers.cloned(),
-            image: Some(test.handle.clone()),
+            image: test.handle.clone(),
         });
     }
 }

@@ -23,7 +23,7 @@ pub struct TestRenderComponent {
     pub y : f32,
     pub w : f32,
     pub h : f32,
-    pub handle : Handle<Image>,
+    pub handle : Option<Handle<Image>>,
 }
 
 //plugin
