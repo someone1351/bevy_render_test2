@@ -84,8 +84,11 @@ impl<P: PhaseItem, const I: usize> RenderCommand<P> for SetColorTextureBindGroup
         // };
 
         let bind_group=image_bind_groups.values.get(&batch.image_handle.as_ref().map(|x|x.id()));
-        let bind_group=bind_group.or_else(||image_bind_groups.values.get(&None)).unwrap();
-
+        let bind_group=bind_group.or_else(||image_bind_groups.values.get(&None));
+        // let bind_group=bind_group.unwrap();
+        let Some(bind_group)=bind_group else {
+            return RenderCommandResult::Failure("my tex image missing");
+        };
         pass.set_bind_group( I, bind_group, &[], );
         // println!("drawing4");
         RenderCommandResult::Success

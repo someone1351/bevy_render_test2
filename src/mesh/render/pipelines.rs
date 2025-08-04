@@ -73,7 +73,8 @@ impl SpecializedRenderPipeline for MyUiPipeline {
             primitive: PrimitiveState {
                 // front_face: FrontFace::Ccw,
                 front_face: FrontFace::Cw,
-                cull_mode: Some(Face::Back),
+                // cull_mode: Some(Face::Back),
+                cull_mode: None,
                 unclipped_depth: false,
                 polygon_mode: PolygonMode::Fill,
                 conservative: false,

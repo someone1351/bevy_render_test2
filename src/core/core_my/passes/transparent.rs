@@ -1,6 +1,8 @@
 
 // use crate::core_2d::Opaque2d;
 use bevy::ecs::prelude::World;
+use bevy::math::UVec2;
+use bevy::render::camera::Viewport;
 use bevy::render::render_phase::ViewSortedRenderPhases;
 use bevy::render::{
     camera::ExtractedCamera,
@@ -84,7 +86,9 @@ impl ViewNode for MainTransparentPassMyNode {
                 let pass_span = diagnostics.pass_span(&mut render_pass, "main_transparent_pass_my");
 
                 if let Some(viewport) = camera.viewport.as_ref() {
-                    render_pass.set_camera_viewport(viewport);
+                    let viewport=Viewport { physical_size: viewport.physical_size.max(UVec2::new(1,1)), ..viewport.clone()};
+                    render_pass.set_camera_viewport(&viewport);
+
                 }
 
                 if !transparent_phase.items.is_empty() {

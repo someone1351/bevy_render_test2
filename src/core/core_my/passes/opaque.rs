@@ -1,6 +1,8 @@
 
 // use crate::core_2d::Opaque2d;
 use bevy::ecs::{prelude::World, query::QueryItem};
+use bevy::math::UVec2;
+use bevy::render::camera::Viewport;
 use bevy::render::{
     camera::ExtractedCamera,
     diagnostic::RecordDiagnostics,
@@ -78,7 +80,8 @@ impl ViewNode for MainOpaquePassMyNode {
             let pass_span = diagnostics.pass_span(&mut render_pass, "main_opaque_pass_my");
 
             if let Some(viewport) = camera.viewport.as_ref() {
-                render_pass.set_camera_viewport(viewport);
+                let viewport=Viewport { physical_size: viewport.physical_size.max(UVec2::new(1,1)), ..viewport.clone()};
+                render_pass.set_camera_viewport(&viewport);
             }
 
             // Opaque draws

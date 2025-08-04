@@ -1,5 +1,6 @@
 // use crate::{blit::BlitPipeline, upscaling::ViewUpscalingPipeline};
 use bevy::ecs::{prelude::*, query::QueryItem};
+use bevy::math::UVec2;
 use bevy::render::{
     camera::{CameraOutputMode, ClearColor, ClearColorConfig, ExtractedCamera},
     render_graph::{NodeRunError, RenderGraphContext, ViewNode},
@@ -90,9 +91,10 @@ impl ViewNode for UpscalingNode {
 
         if let Some(camera) = camera {
             if let Some(viewport) = &camera.viewport {
-                let size = viewport.physical_size;
+                let size = viewport.physical_size;//.max(UVec2::new(1,1));
                 let position = viewport.physical_position;
                 render_pass.set_scissor_rect(position.x, position.y, size.x, size.y);
+                // render_pass.set_scissor_rect(0,0,1,1);
             }
         }
 

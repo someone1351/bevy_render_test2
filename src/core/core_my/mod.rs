@@ -35,11 +35,13 @@ pub struct CoreMyPlugin;
 impl Plugin for CoreMyPlugin {
     fn build(&self, app: &mut App) {
         app.register_type::<CameraMy>()
-            .add_plugins(ExtractComponentPlugin::<CameraMy>::default());
+            .add_plugins(ExtractComponentPlugin::<CameraMy>::default())
+            ;
 
         let Some(render_app) = app.get_sub_app_mut(RenderApp) else {
             return;
         };
+
         render_app
             .init_resource::<DrawFunctions<OpaqueMy>>()
             .init_resource::<DrawFunctions<AlphaMaskMy>>()
@@ -49,7 +51,10 @@ impl Plugin for CoreMyPlugin {
             .init_resource::<ViewSortedRenderPhases<TransparentMy>>()
             .init_resource::<ViewBinnedRenderPhases<OpaqueMy>>()
             .init_resource::<ViewBinnedRenderPhases<AlphaMaskMy>>()
-            .add_systems(ExtractSchedule, extract_core_2d_camera_phases)
+            .add_systems(ExtractSchedule, (
+                extract_core_2d_camera_phases,
+                // extract_camera_view,
+            ).chain() )
             .add_systems(
                 Render,
                 (
