@@ -12,7 +12,7 @@ use bevy::render::render_resource::*;
 
 use bevy::image::BevyDefault;
 
-use crate::core::core_my::CORE_2D_DEPTH_FORMAT;
+use super::super::super::core::core_my::CORE_2D_DEPTH_FORMAT;
 
 use super::shaders::MY_COLORED_MESH2D_SHADER_HANDLE;
 

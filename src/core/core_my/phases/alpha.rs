@@ -1,4 +1,6 @@
 
+#![allow(dead_code)]
+
 use core::ops::Range;
 
 use bevy::asset::UntypedAssetId;
