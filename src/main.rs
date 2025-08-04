@@ -102,35 +102,35 @@ pub fn setup_ui(
 
 pub fn setup_2d(
     mut commands: Commands,
-    asset_server: Res<AssetServer>,
+    // asset_server: Res<AssetServer>,
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<ColorMaterial>>,
     mut images: ResMut<Assets<Image>>,
 ) {
-    // let size = Extent3d {
-    //     width: 500,
-    //     height: 500,
-    //     ..default()
-    // };
-    // let mut image = Image::new_fill(
-    //     size,
-    //     TextureDimension::D2,
-    //     &[255,255,255,255],
-    //     // TextureFormat::Bgra8UnormSrgb, //Rgba8Unorm
-    //     TextureFormat::Rgba8UnormSrgb,
-    //     RenderAssetUsages::default(),
-    // );
-    // // You need to set these texture usage flags in order to use the image as a render target
-    // image.texture_descriptor.usage = TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT;
+    let size = Extent3d {
+        width: 500,
+        height: 500,
+        ..default()
+    };
+    let mut image = Image::new_fill(
+        size,
+        TextureDimension::D2,
+        &[255,255,255,255],
+        // TextureFormat::Bgra8UnormSrgb, //Rgba8Unorm
+        TextureFormat::Rgba8UnormSrgb,
+        RenderAssetUsages::default(),
+    );
+    // You need to set these texture usage flags in order to use the image as a render target
+    image.texture_descriptor.usage = TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT;
 
-    // let image_handle = images.add(image);
+    let image_handle = images.add(image);
 
     commands.spawn((
         render_test2::core::core_my::CameraMy::default(),
         // Projection::Orthographic(OrthographicProjection::default_2d()),
 
         Camera {
-            // target: image_handle.clone().into(),
+            target: image_handle.clone().into(),
             clear_color: Color::WHITE.into(),
             order: 0,
             // clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.1, 0.5)),
@@ -236,9 +236,9 @@ pub fn setup_2d(
             // col: Color::srgb(1.0,0.2,0.6),
             x: 0.0, y: 0.0, w: 400.0, h: 400.0,
             col:Color::WHITE.into(),
-            // handle:Some(image_handle),
+            handle:Some(image_handle),
             // handle:Some(asset_server.load("bevy_logo_dark_big.png")),
-            handle:None,
+            // handle:None,
         },
         // RenderLayers::layer(1),
         RenderLayers::from_layers(&[1]),

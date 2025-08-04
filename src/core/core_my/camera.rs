@@ -7,13 +7,16 @@ use bevy::math::{Mat4, Rect, Vec2, Vec3A};
 use bevy::reflect::{std_traits::ReflectDefault, Reflect};
 use bevy::render::camera::{ScalingMode, SubCameraView};
 use bevy::render::{
-    camera::{Camera, CameraProjection, CameraRenderGraph, OrthographicProjection, Projection},
+    camera::{Camera, CameraProjection, CameraRenderGraph, Projection},
     extract_component::ExtractComponent,
-    primitives::Frustum,
 };
-use bevy::transform::prelude::{GlobalTransform, Transform};
+use bevy::transform::prelude::Transform;
 
 use super::graph::CoreMy;
+
+const UI_CAMERA_TRANSFORM_OFFSET: f32 = -0.1;
+const UI_CAMERA_FAR: f32 = 1000.0;
+// GlobalTransform::from_xyz(0.0, 0.0, UI_CAMERA_FAR + UI_CAMERA_TRANSFORM_OFFSET,)
 
 /// A 2D camera component. Enables the 2D render graph for a [`Camera`].
 #[derive(Component, Default, Reflect, Clone, ExtractComponent)]
@@ -24,9 +27,11 @@ use super::graph::CoreMy;
     // // DebandDither,
     CameraRenderGraph::new(CoreMy),
     // Projection::Orthographic(OrthographicProjection::default_2d()),
-    Projection::custom(OrthographicProjection2::default_2d()),
+    Projection::custom(MyOrthographicProjection::default()),
     // Frustum = OrthographicProjection::default_2d().compute_frustum(&GlobalTransform::from(Transform::default())),
     // // Tonemapping::None,
+
+    Transform::from_xyz( 0.0, 0.0, UI_CAMERA_FAR + UI_CAMERA_TRANSFORM_OFFSET, ),
 )]
 pub struct CameraMy;
 // struct Aa(Frustum);
@@ -88,7 +93,7 @@ pub struct CameraMy;
 
 #[derive(Debug, Clone, Reflect)]
 #[reflect(Debug, FromWorld, Clone)]
-pub struct OrthographicProjection2 {
+pub struct MyOrthographicProjection {
     pub near: f32,
     pub far: f32,
     pub viewport_origin: Vec2,
@@ -96,7 +101,7 @@ pub struct OrthographicProjection2 {
     pub scale: f32,
     pub area: Rect,
 }
-impl CameraProjection for OrthographicProjection2 {
+impl CameraProjection for MyOrthographicProjection {
     fn get_clip_from_view(&self) -> Mat4 {
         Mat4::orthographic_rh(
             self.area.min.x,
@@ -131,14 +136,16 @@ impl CameraProjection for OrthographicProjection2 {
         let top_prime = top - scale_h * offset_y;
         let bottom_prime = top_prime - scale_h * sub_height;
         Mat4::orthographic_rh(
-            // left_prime,
-            // right_prime,
+            left_prime,
+            right_prime,
             // bottom_prime,
             // top_prime,
-            0.0,
-            full_width,
-            full_height,
-            0.0,
+            top_prime,
+            bottom_prime,
+            // 0.0,
+            // full_width,
+            // full_height,
+            // 0.0,
             self.far,
             self.near,
         )
@@ -189,58 +196,60 @@ impl CameraProjection for OrthographicProjection2 {
     fn get_frustum_corners(&self, z_near: f32, z_far: f32) -> [Vec3A; 8] {
         let area = self.area;
         [
-            Vec3A::new(area.max.x, area.min.y, z_near), // bottom right
+            // Vec3A::new(area.max.x, area.min.y, z_near), // bottom right
+            // Vec3A::new(area.max.x, area.max.y, z_near), // top right
+            // Vec3A::new(area.min.x, area.max.y, z_near), // top left
+            // Vec3A::new(area.min.x, area.min.y, z_near), // bottom left
+
             Vec3A::new(area.max.x, area.max.y, z_near), // top right
-            Vec3A::new(area.min.x, area.max.y, z_near), // top left
+            Vec3A::new(area.max.x, area.min.y, z_near), // bottom right
             Vec3A::new(area.min.x, area.min.y, z_near), // bottom left
-            Vec3A::new(area.max.x, area.min.y, z_far),  // bottom right
+            Vec3A::new(area.min.x, area.max.y, z_near), // top left
+
+            // Vec3A::new(area.max.x, area.min.y, z_far),  // bottom right
+            // Vec3A::new(area.max.x, area.max.y, z_far),  // top right
+            // Vec3A::new(area.min.x, area.max.y, z_far),  // top left
+            // Vec3A::new(area.min.x, area.min.y, z_far),  // bottom left
+
             Vec3A::new(area.max.x, area.max.y, z_far),  // top right
-            Vec3A::new(area.min.x, area.max.y, z_far),  // top left
+            Vec3A::new(area.max.x, area.min.y, z_far),  // bottom right
             Vec3A::new(area.min.x, area.min.y, z_far),  // bottom left
+            Vec3A::new(area.min.x, area.max.y, z_far),  // top left
         ]
     }
 }
-impl FromWorld for OrthographicProjection2 {
-    fn from_world(_world: &mut World) -> Self {
-        OrthographicProjection2::default_3d()
-    }
-}
-impl OrthographicProjection2 {
+// impl FromWorld for MyOrthographicProjection {
+//     fn from_world(_world: &mut World) -> Self {
+//         MyOrthographicProjection::default_3d()
+//     }
+// }
+impl MyOrthographicProjection {
     pub fn default_2d() -> Self {
-        OrthographicProjection2 {
+        MyOrthographicProjection {
             scale: 1.0,
-            near: -1000.0,
-            far: 1000.0,
+            far: UI_CAMERA_FAR,//1000.0,
             viewport_origin: Vec2::new(0.0, 0.0),
             scaling_mode: ScalingMode::WindowSize,
             area: Rect::new(-1.0, -1.0, 1.0, 1.0),
+
+            near: 0.0,
             // ..OrthographicProjection2::default_3d()
         }
     }
-    pub fn default_3d() -> Self {
-        OrthographicProjection2 {
-            scale: 1.0,
-            near: 0.0,
-            far: 1000.0,
-            viewport_origin: Vec2::new(0.5, 0.5),
-            scaling_mode: ScalingMode::WindowSize,
-            area: Rect::new(-1.0, -1.0, 1.0, 1.0),
-        }
-    }
+    // pub fn default_3d() -> Self {
+    //     MyOrthographicProjection {
+    //         scale: 1.0,
+    //         near: 0.0,
+    //         far: 1000.0,
+    //         viewport_origin: Vec2::new(0.5, 0.5),
+    //         scaling_mode: ScalingMode::WindowSize,
+    //         area: Rect::new(-1.0, -1.0, 1.0, 1.0),
+    //     }
+    // }
 }
 
-// impl Default for OrthographicProjection2 {
-//     fn default() -> Self {
-//         // OrthographicProjection::
-//         Self { ortho: OrthographicProjection {
-//             near: 0.0,
-//             far: 1000.0,
-//             viewport_origin: Vec2::new(0.0, 0.0),
-//             scaling_mode: bevy::render::camera::ScalingMode::WindowSize,
-//             scale: 1.0,
-//             area:Rect::default(),
-//             // area: Rect { min: Vec2::new(x, y), max: Vec2::new(x, y) },
-//             // ..Default::default()
-//         } }
-//     }
-// }
+impl Default for MyOrthographicProjection {
+    fn default() -> Self {
+        Self::default_2d()
+    }
+}

@@ -1,6 +1,5 @@
 // use crate::{blit::BlitPipeline, upscaling::ViewUpscalingPipeline};
 use bevy::ecs::{prelude::*, query::QueryItem};
-use bevy::math::UVec2;
 use bevy::render::{
     camera::{CameraOutputMode, ClearColor, ClearColorConfig, ExtractedCamera},
     render_graph::{NodeRunError, RenderGraphContext, ViewNode},
