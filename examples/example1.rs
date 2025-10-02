@@ -2,7 +2,7 @@
 use std::collections::HashSet;
 
 use bevy::{asset::RenderAssetUsages, camera::{visibility::RenderLayers, Viewport}, prelude::*, render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages}, window::WindowResolution};
-use render_test2::{core::CorePipelinePlugin, mesh::{TestRenderComponent, TestRenderPlugin}};
+use render_test::{core::{core_my::CameraMy, CorePipelinePlugin}, mesh::{TestRenderComponent, TestRenderPlugin}};
 // use bevy::render::view::RenderLayers;
 // use render_test2::{render::camera::CameraMyTest, TestRenderComponent, TestRenderPlugin};
 // use bevy::color::palettes::basic::SILVER;
@@ -126,7 +126,7 @@ pub fn setup_2d(
     let _image_handle = images.add(image);
 
     commands.spawn((
-        render_test2::core::core_my::CameraMy::default(),
+        CameraMy::default(),
         // Projection::Orthographic(OrthographicProjection::default_2d()),
 
         Camera {
@@ -145,7 +145,7 @@ pub fn setup_2d(
         // Transform::from_xyz( 0.0, 0.0, 999.0, ),
     ));
     commands.spawn((
-        render_test2::core::core_my::CameraMy::default(),
+        CameraMy::default(),
         // Projection::Orthographic(OrthographicProjection::default_2d()),
         Camera {
             order: 1,

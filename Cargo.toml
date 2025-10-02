@@ -8,13 +8,10 @@ bevy = { version = "0.17", default-features = false, features = [
     "bevy_render","bevy_asset","bevy_color","bevy_image","trace",
     #"bevy_core_pipeline",
     #"bevy_sprite",
-
     "serialize",
     "multi_threaded",
-
-    "dynamic_linking",
     "png",
-    "bevy_window","x11",
+    "bevy_window",
 ] }
 
 bytemuck = "1.7"
@@ -22,9 +19,19 @@ tracing = { version = "0.1", default-features = false, features = ["std"] }
 radsort = "0.1"
 
 [dev-dependencies]
-bevy = { version = "0.17", default-features = true, features = [ "serialize","file_watcher",] }
+bevy = { version = "0.17", default-features = true, features = [ "serialize","file_watcher",
+    #"dynamic_linking",
+] }
 
 [features]
 trace = []
 webgl = []
 webgpu = []
+
+[lib]
+name = "render_test"
+path = "src/lib.rs"
+
+[[example]]
+name = "example1"
+path = "examples/example1.rs"
