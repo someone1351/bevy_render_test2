@@ -1,7 +1,7 @@
 
 use std::collections::HashSet;
 
-use bevy::{asset::RenderAssetUsages, prelude::*, render::{camera::Viewport, render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages}, view::RenderLayers}, window::WindowResolution};
+use bevy::{asset::RenderAssetUsages, camera::{visibility::RenderLayers, Viewport}, prelude::*, render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages}, window::WindowResolution};
 use render_test2::{core::CorePipelinePlugin, mesh::{TestRenderComponent, TestRenderPlugin}};
 // use bevy::render::view::RenderLayers;
 // use render_test2::{render::camera::CameraMyTest, TestRenderComponent, TestRenderPlugin};
@@ -24,7 +24,7 @@ fn main() {
                 .set(WindowPlugin {
                     primary_window: Some(Window {
                         title: "render test".into(),
-                        resolution: WindowResolution::new(1100.0, 600.0)
+                        resolution: WindowResolution::new(1100, 600)
                         // .sc
                             .with_scale_factor_override(1.0)
                             ,
@@ -102,7 +102,7 @@ pub fn setup_ui(
 
 pub fn setup_2d(
     mut commands: Commands,
-    // asset_server: Res<AssetServer>,
+    asset_server: Res<AssetServer>,
     // mut meshes: ResMut<Assets<Mesh>>,
     // mut materials: ResMut<Assets<ColorMaterial>>,
     mut images: ResMut<Assets<Image>>,
@@ -123,14 +123,14 @@ pub fn setup_2d(
     // You need to set these texture usage flags in order to use the image as a render target
     image.texture_descriptor.usage = TextureUsages::TEXTURE_BINDING | TextureUsages::COPY_DST | TextureUsages::RENDER_ATTACHMENT;
 
-    let image_handle = images.add(image);
+    let _image_handle = images.add(image);
 
     commands.spawn((
         render_test2::core::core_my::CameraMy::default(),
         // Projection::Orthographic(OrthographicProjection::default_2d()),
 
         Camera {
-            target: image_handle.clone().into(),
+            // target: image_handle.clone().into(),
             clear_color: Color::WHITE.into(),
             order: 0,
             // clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.1, 0.5)),
@@ -142,7 +142,7 @@ pub fn setup_2d(
             ..Default::default()
         },
         RenderLayers::layer(0),
-        Transform::from_xyz( 0.0, 0.0, 999.0, ),
+        // Transform::from_xyz( 0.0, 0.0, 999.0, ),
     ));
     commands.spawn((
         render_test2::core::core_my::CameraMy::default(),
@@ -236,8 +236,8 @@ pub fn setup_2d(
             // col: Color::srgb(1.0,0.2,0.6),
             x: 0.0, y: 0.0, w: 400.0, h: 400.0,
             col:Color::WHITE.into(),
-            handle:Some(image_handle),
-            // handle:Some(asset_server.load("bevy_logo_dark_big.png")),
+            // handle:Some(image_handle),
+            handle:Some(asset_server.load("bevy_logo_dark_big.png")),
             // handle:None,
         },
         // RenderLayers::layer(1),
@@ -324,8 +324,8 @@ pub fn setup_2d(
 // }
 
 fn update_input(
-    mut key_events: EventReader<bevy::input::keyboard::KeyboardInput>,
-    mut exit: EventWriter<AppExit>,
+    mut key_events: MessageReader<bevy::input::keyboard::KeyboardInput>,
+    mut exit: MessageWriter<AppExit>,
     mut last_pressed:Local<HashSet<KeyCode>>,
 ) {
     for ev in key_events.read() {

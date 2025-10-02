@@ -5,17 +5,18 @@ use std::collections::HashMap;
 
 
 use bevy::asset::AssetEvent;
+use bevy::camera::visibility::RenderLayers;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::query::With;
 use bevy::image::Image;
 use bevy::math::FloatOrd;
-use bevy::prelude::{EventReader, Msaa};
+use bevy::prelude::{MessageReader, Msaa};
 use bevy::render::render_asset::RenderAssets;
 use bevy::render::texture::GpuImage;
 use bevy::render::{render_phase::*, Extract};
 use bevy::render::renderer::{RenderDevice, RenderQueue};
 use bevy::render::sync_world::{MainEntity, TemporaryRenderEntity};
-use bevy::render::view::{ExtractedView, RenderLayers, ViewUniforms};
+use bevy::render::view::{ExtractedView,  ViewUniforms};
 use bevy::ecs::system::*;
 
 
@@ -72,7 +73,7 @@ pub fn extract_images(
         Entity,
         &TestRenderComponent,
     )> >,
-    mut image_asset_events: Extract<EventReader<AssetEvent<Image>>>,
+    mut image_asset_events: Extract<MessageReader<AssetEvent<Image>>>,
 
     render_device: Res<RenderDevice>,
     mesh2d_pipeline: Res<MyUiPipeline>,
