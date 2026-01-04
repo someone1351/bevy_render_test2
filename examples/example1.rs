@@ -131,9 +131,10 @@ pub fn setup_2d(
 
         Camera {
             // target: image_handle.clone().into(),
-            clear_color: Color::WHITE.into(),
-            order: 0,
+            // clear_color: Color::WHITE.into(),
             // clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.1, 0.5)),
+            clear_color: ClearColorConfig::Custom(Color::srgba(0.0, 0.0, 0.0,0.0)),
+            order: 0,
             viewport: Some(Viewport {
                 physical_position: UVec2::new(0, 0),
                 physical_size: UVec2::new(500, 500),
@@ -149,10 +150,13 @@ pub fn setup_2d(
         // Projection::Orthographic(OrthographicProjection::default_2d()),
         Camera {
             order: 1,
-            clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.7, 0.1)),
+            // clear_color: ClearColorConfig::Custom(Color::srgb(0.2, 0.7, 0.1)),
+            clear_color: ClearColorConfig::Custom(Color::srgba(0.0, 0.0, 0.0,0.0)),
             // clear_color: Color::WHITE.into(),
             viewport: Some(Viewport {
-                physical_position: UVec2::new(500, 0),
+                // physical_position: UVec2::new(500, 0),
+
+                physical_position: UVec2::new(0, 0),
                 physical_size: UVec2::new(500, 500),
                 ..Default::default()
             }),
