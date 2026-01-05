@@ -65,7 +65,17 @@ pub fn dummy_image_setup(
 
 
 
+pub fn extract_sprite_events(
+    mut events: ResMut<MySpriteAssetEvents>,
+    mut image_events: Extract<MessageReader<AssetEvent<Image>>>,
+) {
+    let MySpriteAssetEvents { ref mut images } = *events;
+    images.clear();
 
+    for event in image_events.read() {
+        images.push(*event);
+    }
+}
 
 pub fn extract_images(
     // mut commands: Commands,
@@ -73,7 +83,8 @@ pub fn extract_images(
         Entity,
         &TestRenderComponent,
     )> >,
-    mut image_asset_events: Extract<MessageReader<AssetEvent<Image>>>,
+    // mut image_asset_events: Extract<MessageReader<AssetEvent<Image>>>,
+    events: Res<MySpriteAssetEvents>,
 
     render_device: Res<RenderDevice>,
     mesh2d_pipeline: Res<MyUiPipeline>,
@@ -81,15 +92,26 @@ pub fn extract_images(
     gpu_images: Res<RenderAssets<GpuImage>>,
 ) {
 
-    for event in image_asset_events.read()
-    {
+    for event in &events.images {
         match event {
-            AssetEvent::Removed { id } | AssetEvent::Modified { id } => {
-                image_bind_groups.values.remove(&Some(id.clone()));//.unwrap();
+            AssetEvent::Added { .. } |
+            AssetEvent::Unused { .. } |
+            // Images don't have dependencies
+            AssetEvent::LoadedWithDependencies { .. } => {}
+            AssetEvent::Modified { id } | AssetEvent::Removed { id } => {
+                image_bind_groups.values.remove(&Some(id.clone()));
             }
-            _ =>{}
-        }
+        };
     }
+    // for event in image_asset_events.read()
+    // {
+    //     match event {
+    //         AssetEvent::Removed { id } | AssetEvent::Modified { id } => {
+    //             image_bind_groups.values.remove(&Some(id.clone()));//.unwrap();
+    //         }
+    //         _ =>{}
+    //     }
+    // }
 
     for (_entity, test,  ) in uinode_query.iter() {
         let image_id=test.handle.clone().map(|x|x.id());

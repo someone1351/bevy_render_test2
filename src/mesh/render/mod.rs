@@ -60,6 +60,7 @@ pub fn render_setup(app: &mut App) {
         .init_resource::<MyUiImageBindGroups>()
         .init_resource::<MyUiPipeline>()
         .init_resource::<SpecializedRenderPipelines<MyUiPipeline>>()
+        .init_resource::<MySpriteAssetEvents>()
         // // .init_resource::<DrawFunctions<MyTransparentUi>>()
         // // .init_resource::<ViewSortedRenderPhases<MyTransparentUi>>()
         // .add_render_command::<MyTransparentUi, DrawMesh>()
@@ -72,6 +73,7 @@ pub fn render_setup(app: &mut App) {
             // // extract_camera_view,
             dummy_image_setup,
             extract_images,
+            extract_sprite_events,
             // extract_events,
             extract_uinodes,
         ).chain())

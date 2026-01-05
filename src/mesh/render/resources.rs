@@ -1,5 +1,5 @@
 
-use bevy::asset::{AssetId, Handle};
+use bevy::asset::{AssetEvent, AssetId, Handle};
 use bevy::camera::visibility::RenderLayers;
 use bevy::color::Color;
 use bevy::ecs::resource::Resource;
@@ -64,3 +64,8 @@ pub struct MyUiImageBindGroups {
 }
 
 
+
+#[derive(Resource, Default)]
+pub struct MySpriteAssetEvents {
+    pub images: Vec<AssetEvent<Image>>,
+}

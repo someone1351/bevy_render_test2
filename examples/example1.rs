@@ -266,6 +266,42 @@ pub fn setup_2d(
     //     //     ),
     //     // ));
     // }
+
+
+    commands.spawn((
+        CameraMy::default(),
+        // Projection::Orthographic(OrthographicProjection::default_2d()),
+
+        Camera {
+            clear_color: ClearColorConfig::Custom(Color::srgba(1.0, 0.0, 0.0,1.0)),
+            order: 10,
+            viewport: Some(Viewport {
+                physical_position: UVec2::new(500, 0),
+                physical_size: UVec2::new(500, 500),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        RenderLayers::layer(10),
+        // Transform::from_xyz( 0.0, 0.0, 999.0, ),
+    ));
+    commands.spawn((
+        CameraMy::default(),
+        // Projection::Orthographic(OrthographicProjection::default_2d()),
+
+        Camera {
+            clear_color: ClearColorConfig::Custom(Color::srgba(0.0, 0.0, 1.0,1.0)),
+            order: 11,
+            viewport: Some(Viewport {
+                physical_position: UVec2::new(500, 500),
+                physical_size: UVec2::new(500, 500),
+                ..Default::default()
+            }),
+            ..Default::default()
+        },
+        RenderLayers::layer(10),
+        // Transform::from_xyz( 0.0, 0.0, 999.0, ),
+    ));
 }
 
 // pub fn setup_3d(
