@@ -23,8 +23,10 @@ use bevy::ecs::system::*;
 use bevy::render::render_resource::*;
 
 
+use crate::mesh::render::utils::create_image_bind_group;
+
 use super::draws::DrawMesh;
-use super::dummy_image::create_dummy_image;
+use super::utils::create_dummy_image;
 use super::pipelines::*;
 use super::components::*;
 use super::resources::*;
@@ -39,6 +41,7 @@ pub fn dummy_image_setup(
     render_device: Res<RenderDevice>,
     render_queue: Res<RenderQueue>,
     mesh2d_pipeline: Res<MyUiPipeline>,
+    pipeline_cache: Res<PipelineCache>,
     mut image_bind_groups: ResMut<MyUiImageBindGroups>,
     mut init:Local<bool>,
 ) {
@@ -52,12 +55,21 @@ pub fn dummy_image_setup(
 
     let gpu_image=create_dummy_image(&render_device,&render_queue);
 
+    // let bind_group=render_device.create_bind_group(
+    //     "my_ui_material_bind_group",
+    //     &mesh2d_pipeline.image_layout, &[
+    //         BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+    //         BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+    //     ]
+    // );
+
     let bind_group=render_device.create_bind_group(
         "my_ui_material_bind_group",
-        &mesh2d_pipeline.image_layout, &[
-            BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
-            BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
-        ]
+        &pipeline_cache.get_bind_group_layout(&mesh2d_pipeline.image_layout),
+        &BindGroupEntries::sequential((
+            &gpu_image.texture_view,
+            &gpu_image.sampler,
+        )),
     );
 
     image_bind_groups.values.insert(None, bind_group);
@@ -88,6 +100,7 @@ pub fn extract_images(
 
     render_device: Res<RenderDevice>,
     mesh2d_pipeline: Res<MyUiPipeline>,
+    pipeline_cache: Res<PipelineCache>,
     mut image_bind_groups: ResMut<MyUiImageBindGroups>,
     gpu_images: Res<RenderAssets<GpuImage>>,
 ) {
@@ -116,29 +129,45 @@ pub fn extract_images(
     for (_entity, test,  ) in uinode_query.iter() {
         let image_id=test.handle.clone().map(|x|x.id());
         // let image_id=test.handle.id();
+
+        let Some(image_id)=image_id else { continue; };
+
         //
-        if image_bind_groups.values.contains_key(&image_id) {
-            continue;
+
+
+        if let Some(gpu_image)=gpu_images.get(image_id) {
+            image_bind_groups.values.entry(Some(image_id.clone())).or_insert_with(||{
+                create_image_bind_group(&render_device,&mesh2d_pipeline,&pipeline_cache,&gpu_image)
+            });
         }
 
-        let Some(image_id)=image_id else {
-            continue;
-        };
+        // //
+        // if image_bind_groups.values.contains_key(&image_id) {
+        //     continue;
+        // }
 
-        // let gpu_image=image_id.and_then(|image_id|gpu_images.get(image_id));
-        let gpu_image=gpu_images.get(image_id);
+        // let Some(image_id)=image_id else {
+        //     continue;
+        // };
 
-        let bind_group=gpu_image.map(|gpu_image|render_device.create_bind_group(
-            "my_ui_material_bind_group",
-            &mesh2d_pipeline.image_layout, &[
-                BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
-                BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
-            ]
-        ));
+        // // let gpu_image=image_id.and_then(|image_id|gpu_images.get(image_id));
+        // let gpu_image=gpu_images.get(image_id);
 
-        if let Some(bind_group)=bind_group {
-            image_bind_groups.values.insert(Some(image_id), bind_group);
-        }
+        // let bind_group=gpu_image.map(|gpu_image|render_device.create_bind_group(
+        //     "my_ui_material_bind_group",
+        //     &mesh2d_pipeline.image_layout, &[
+        //         BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+        //         BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+        //     ]
+        // ));
+
+        // //
+
+        // //
+
+        // if let Some(bind_group)=bind_group {
+        //     image_bind_groups.values.insert(Some(image_id), bind_group);
+        // }
     }
 }
 
@@ -270,14 +299,17 @@ pub fn prepare_views(
     mesh2d_pipeline: Res<MyUiPipeline>,
     view_uniforms: Res<ViewUniforms>,
     extracted_views: Query<Entity, With<ExtractedView>>,
+    pipeline_cache: Res<PipelineCache>,
 ) {
     if let Some(view_binding) = view_uniforms.uniforms.binding() {
         for view_entity in extracted_views.iter() {
             let view_bind_group = render_device.create_bind_group(
-                "my_mesh2d_view_bind_group",&mesh2d_pipeline.view_layout,&[BindGroupEntry {
-                    binding: 0,
-                    resource: view_binding.clone(),
-                }],);
+                "my_mesh2d_view_bind_group",
+                // &mesh2d_pipeline.view_layout,
+                &pipeline_cache.get_bind_group_layout(&mesh2d_pipeline.view_layout),
+                // &[BindGroupEntry { binding: 0, resource: view_binding.clone(), }],
+                &BindGroupEntries::single(view_binding.clone()),
+            );
 
             commands.entity(view_entity).insert(MyViewBindGroup { value: view_bind_group, });
         }

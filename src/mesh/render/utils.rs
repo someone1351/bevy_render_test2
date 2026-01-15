@@ -4,8 +4,10 @@ use bevy::{
         // ImageSampler,
         TextureFormatPixelInfo,
     },
-    render::{render_resource::{AddressMode, FilterMode, SamplerDescriptor, TexelCopyBufferLayout, TextureViewDescriptor}, renderer::{RenderDevice, RenderQueue}, texture::GpuImage}
+    render::{render_resource::{AddressMode, BindGroup, BindGroupEntries, FilterMode, PipelineCache, SamplerDescriptor, TexelCopyBufferLayout, TextureViewDescriptor}, renderer::{RenderDevice, RenderQueue}, texture::GpuImage}
 };
+
+use crate::mesh::render::pipelines::MyUiPipeline;
 
 pub fn create_dummy_image(render_device: &RenderDevice, render_queue:&RenderQueue,
     // default_sampler:&DefaultImageSampler
@@ -51,6 +53,9 @@ pub fn create_dummy_image(render_device: &RenderDevice, render_queue:&RenderQueu
         sampler,
         size: image.texture_descriptor.size,
         mip_level_count: image.texture_descriptor.mip_level_count,
+
+        texture_view_format: image.texture_view_descriptor.and_then(|v| v.format),
+        had_data: false,
     }
 }
 
@@ -165,3 +170,41 @@ pub fn extract_dummy_image_setup(
 
 
 */
+
+
+pub fn create_image_bind_group(
+    render_device: &RenderDevice,
+    mesh2d_pipeline: &MyUiPipeline,
+
+    pipeline_cache: &PipelineCache,
+    // image_bind_groups: &mut MyUiImageBindGroups,
+    // handle:Option<AssetId<Image>>,
+    gpu_image:&GpuImage,
+) -> BindGroup {
+
+    // let bind_group=
+    // render_device.create_bind_group(
+    //     "my_ui_material_bind_group",
+    //     &mesh2d_pipeline.image_layout, &[
+    //         BindGroupEntry {binding: 0, resource: BindingResource::TextureView(&gpu_image.texture_view),},
+    //         BindGroupEntry {binding: 1, resource: BindingResource::Sampler(&gpu_image.sampler),},
+    //     ]
+    // )
+
+    // ;
+
+    // let image_id=handle.clone();//.map(|x|x.id());
+    // image_bind_groups.values.insert(image_id, bind_group);
+
+    // bind_group
+
+
+    render_device.create_bind_group(
+        "my_ui_material_bind_group",
+        &pipeline_cache.get_bind_group_layout(&mesh2d_pipeline.image_layout),
+        &BindGroupEntries::sequential((
+            &gpu_image.texture_view,
+            &gpu_image.sampler,
+        )),
+    )
+}
