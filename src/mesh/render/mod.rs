@@ -16,7 +16,7 @@ use draws::DrawMesh;
 use pipelines::MyUiPipeline;
 use shaders::setup_shaders;
 
-use super::super::core::core_my::TransparentMy;
+use super::super::core::TransparentMy;
 
 // use bevy::transform::components::GlobalTransform;
 

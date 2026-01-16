@@ -1,24 +1,18 @@
 
-pub mod core_my;
-pub mod upscaling;
+// #![allow(unused_imports)]
 
-use bevy::app::{App, Plugin};
+mod camera;
+mod passes;
+mod graph;
+mod systems;
+mod phases;
+mod plugin;
 
-use core_my::CoreMyPlugin;
-use upscaling::UpscalingPlugin;
+pub use camera::*;
+pub use passes::*;
+pub use plugin::*;
+pub use phases::*;
 
-#[derive(Default)]
-pub struct CorePipelinePlugin;
+use bevy::render::render_resource::TextureFormat;
 
-impl Plugin for CorePipelinePlugin {
-    fn build(&self, app: &mut App) {
-
-
-        app
-            .add_plugins((
-                CoreMyPlugin,
-                UpscalingPlugin,
-            ))
-            ;
-    }
-}
+pub const CORE_2D_DEPTH_FORMAT: TextureFormat = TextureFormat::Depth32Float;

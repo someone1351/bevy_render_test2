@@ -2,7 +2,7 @@
 use std::collections::HashSet;
 
 use bevy::{asset::RenderAssetUsages, camera::{visibility::RenderLayers, Viewport}, prelude::*, render::render_resource::{Extent3d, TextureDimension, TextureFormat, TextureUsages}, window::WindowResolution};
-use render_test::{core::{core_my::CameraMy, CorePipelinePlugin}, mesh::{TestRenderComponent, TestRenderPlugin}};
+use render_test::{core::{CameraMy, CoreMyPlugin},mesh::{TestRenderComponent, TestRenderPlugin}, upscaling::UpscalingPlugin } ;
 // use bevy::render::view::RenderLayers;
 // use render_test2::{render::camera::CameraMyTest, TestRenderComponent, TestRenderPlugin};
 // use bevy::color::palettes::basic::SILVER;
@@ -33,7 +33,8 @@ fn main() {
                     }),
                     ..Default::default()
             }),
-            CorePipelinePlugin,
+            CoreMyPlugin,
+            UpscalingPlugin,
             TestRenderPlugin,
         ))
 

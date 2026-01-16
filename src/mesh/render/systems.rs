@@ -31,7 +31,7 @@ use super::pipelines::*;
 use super::components::*;
 use super::resources::*;
 
-use super::super::super::core::core_my::TransparentMy;
+use super::super::super::core::TransparentMy;
 use super::super::TestRenderComponent;
 
 

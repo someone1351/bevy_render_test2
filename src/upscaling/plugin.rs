@@ -1,4 +1,3 @@
-// use crate::blit::{BlitPipeline, BlitPipelineKey};
 use bevy::app::prelude::*;
 use bevy::ecs::prelude::*;
 use bevy::render::render_resource::SpecializedRenderPipelines;
@@ -6,19 +5,9 @@ use bevy::render::{
     Render, RenderApp, RenderSystems,
 };
 
-mod nodes;
-mod systems;
-mod components;
-
-pub mod pipelines;
-pub mod shaders;
-
-use pipelines::*;
-use systems::*;
-
-pub use nodes::UpscalingNode;
-
-// use super::blit::{BlitPipeline, BlitPipelineKey};
+use super::pipelines::BlitPipeline;
+use super::systems::*;
+use super::shaders::*;
 
 pub struct UpscalingPlugin;
 
@@ -27,7 +16,7 @@ impl Plugin for UpscalingPlugin {
 
     fn build(&self, app: &mut App) {
         // load_internal_asset!(app, BLIT_SHADER_HANDLE, "blit.wgsl", Shader::from_wgsl);
-        shaders::setup_shaders(app);
+        setup_shaders(app);
 
         if let Some(render_app) = app.get_sub_app_mut(RenderApp) {
             render_app.allow_ambiguous_resource::<SpecializedRenderPipelines<BlitPipeline>>();
