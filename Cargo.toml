@@ -5,13 +5,14 @@ edition = "2021"
 
 [dependencies]
 bevy = { version = "0.18", default-features = false, features = [
-    "bevy_render","bevy_asset","bevy_color","bevy_image","trace",
+    "bevy_render","bevy_asset","bevy_color","bevy_image",
+    #"trace",
+    #"multi_threaded",
     #"bevy_core_pipeline",
     #"bevy_sprite",
-    "serialize",
-    "multi_threaded",
-    "png",
-    "bevy_window",
+    #"serialize",
+
+    #"bevy_window",
 ] }
 
 bytemuck = "1.7"
@@ -19,8 +20,15 @@ tracing = { version = "0.1", default-features = false, features = ["std"] }
 radsort = "0.1"
 
 [dev-dependencies]
-bevy = { version = "0.18", default-features = true, features = [ "serialize","file_watcher",
-    "dynamic_linking",
+bevy = { version = "0.18", default-features = false, features = [
+    #"bevy_window",
+    #"default_app",
+    #"bevy_gilrs",
+    "bevy_winit",
+#     #"serialize",
+#     "file_watcher",
+#     "dynamic_linking",
+    "png",
 ] }
 
 [features]
